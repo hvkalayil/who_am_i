@@ -19,7 +19,7 @@ class RegistrationScreen extends StatefulWidget {
 }
 
 class _RegistrationScreenState extends State<RegistrationScreen> {
-  File _image, finalImage;
+  File _image, _finalImage;
   String path, userName, jobTitle;
 
   Icon getDefaultIcon() {
@@ -49,14 +49,14 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       image = await ImagePicker.pickImage(source: ImageSource.gallery);
 
     var filename = basename(image.path);
-    finalImage = await image.copy('$path/$filename');
+    _finalImage = await image.copy('$path/$filename');
     setState(() {
-      _image = finalImage;
+      _image = _finalImage;
     });
   }
 
   onLoginClick() async {
-    SharedPrefUtils.saveStr('profileImage', finalImage.path);
+    SharedPrefUtils.saveStr('profileImage', _finalImage.path);
     SharedPrefUtils.saveStr('userName', userName);
     SharedPrefUtils.saveStr('jobTitle', jobTitle);
     Navigator.pushNamed(this.context, SocialMediaSetupScreen.id);
