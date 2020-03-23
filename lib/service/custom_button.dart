@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
-
-import '../constants.dart';
+import 'package:whoami/constants.dart';
 
 class CustomButton extends StatelessWidget {
-  EdgeInsetsGeometry buttonPadding;
-  String buttonText;
-  Function onClick;
-  Color buttonColor;
-  Color textColor;
+  final EdgeInsetsGeometry buttonPadding;
+  final String buttonText;
+  final Function onClick;
+  final Color buttonColor;
+  final Color textColor;
 
   CustomButton(
       {this.buttonText,
@@ -22,6 +21,9 @@ class CustomButton extends StatelessWidget {
       child: Padding(
         padding: buttonPadding,
         child: RaisedButton(
+          splashColor: secondaryColor.withAlpha(100),
+          highlightColor: secondaryColor.withAlpha(50),
+          autofocus: true,
           color: buttonColor,
           padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
           shape: RoundedRectangleBorder(

@@ -1,11 +1,16 @@
+import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:whoami/screens/social_media_setup_screen.dart';
 import 'package:whoami/service/custom_button.dart';
 import 'package:whoami/service/my_flutter_app_icons.dart';
-import 'package:whoami/service/textField.dart';
 import 'package:whoami/constants.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:path/path.dart';
+import 'package:whoami/service/shared_prefs_util.dart';
 
 class RegistrationScreen extends StatefulWidget {
   static String id = 'RegistrationScreen';
@@ -14,8 +19,57 @@ class RegistrationScreen extends StatefulWidget {
 }
 
 class _RegistrationScreenState extends State<RegistrationScreen> {
+  File _image, finalImage;
+  String path, userName, jobTitle;
+
+  Icon getDefaultIcon() {
+    return Icon(
+      MyFlutterApp.icon2,
+      size: 125,
+      color: primaryColor,
+    );
+  }
+
+  Container getImage() {
+    return Container(
+      height: 210,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: Colors.black,
+        image: DecorationImage(image: FileImage(_image), fit: BoxFit.cover),
+      ),
+    );
+  }
+
+  void useImagePicker(bool isCamera) async {
+    File image;
+    if (isCamera)
+      image = await ImagePicker.pickImage(source: ImageSource.camera);
+    else
+      image = await ImagePicker.pickImage(source: ImageSource.gallery);
+
+    var filename = basename(image.path);
+    finalImage = await image.copy('$path/$filename');
+    setState(() {
+      _image = finalImage;
+    });
+  }
+
+  onLoginClick() async {
+    SharedPrefUtils.saveStr('profileImage', finalImage.path);
+    SharedPrefUtils.saveStr('userName', userName);
+    SharedPrefUtils.saveStr('jobTitle', jobTitle);
+    Navigator.pushNamed(this.context, SocialMediaSetupScreen.id);
+  }
+
+  void initjobs() async {
+    Directory dir = await getApplicationDocumentsDirectory();
+    path = dir.path;
+  }
+
   @override
   void initState() {
+    initjobs();
     super.initState();
   }
 
@@ -32,24 +86,41 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
               children: <Widget>[
                 Expanded(
                   flex: 5,
-                  child: CircleAvatar(
-                    backgroundColor: secondaryColor,
-                    radius: 100,
-                    child: FlatButton(
-                      highlightColor: primaryColor,
-                      splashColor: primaryColor,
-                      onPressed: () {
-                        print('object');
-                      },
-                      child: Hero(
-                        tag: 'Register',
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      GestureDetector(
                         child: Icon(
-                          MyFlutterApp.icon2,
-                          size: 125,
-                          color: primaryColor,
+                          Icons.camera,
+                          size: 40,
+                          color: secondaryColor,
+                        ),
+                        onTap: () {
+                          useImagePicker(true);
+                        },
+                      ),
+                      SizedBox(
+                        width: 20,
+                      ),
+                      CircleAvatar(
+                        backgroundColor: secondaryColor,
+                        radius: 100,
+                        child: _image == null ? getDefaultIcon() : getImage(),
+                      ),
+                      SizedBox(
+                        width: 20,
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          useImagePicker(false);
+                        },
+                        child: Icon(
+                          Icons.image,
+                          size: 40,
+                          color: secondaryColor,
                         ),
                       ),
-                    ),
+                    ],
                   ),
                 ),
                 Expanded(
@@ -66,14 +137,45 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                           const EdgeInsets.only(top: 40, left: 20, right: 20),
                       child: Column(
                         children: <Widget>[
-                          textField(
-                            text: 'Name',
+                          Material(
+                            elevation: 5,
+                            shadowColor: Colors.black,
+                            borderRadius: BorderRadius.all(
+                              Radius.circular(40),
+                            ),
+                            child: TextField(
+                                onChanged: (value) {
+                                  userName = value;
+                                },
+                                onSubmitted: (value) {
+                                  FocusScope.of(context).nextFocus();
+                                },
+                                textInputAction: TextInputAction.next,
+                                textCapitalization: TextCapitalization.words,
+                                cursorColor: primaryColor,
+                                textAlign: TextAlign.center,
+                                decoration:
+                                    textFieldDecor.copyWith(labelText: 'Name')),
                           ),
                           SizedBox(
                             height: 20,
                           ),
-                          textField(
-                            text: 'Job Title',
+                          Material(
+                            elevation: 5,
+                            shadowColor: Colors.black,
+                            borderRadius: BorderRadius.all(
+                              Radius.circular(40),
+                            ),
+                            child: TextField(
+                                onChanged: (value) {
+                                  jobTitle = value;
+                                },
+                                textInputAction: TextInputAction.go,
+                                textCapitalization: TextCapitalization.words,
+                                cursorColor: primaryColor,
+                                textAlign: TextAlign.center,
+                                decoration: textFieldDecor.copyWith(
+                                    labelText: 'Job Title')),
                           ),
                         ],
                       ),
@@ -92,9 +194,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                           textColor: secondaryColor,
                           buttonColor: primaryColor,
                           buttonText: 'NEXT >',
-                          onClick: () {
-                            print('object');
-                          },
+                          onClick: () => onLoginClick(),
                         )
                       ],
                     ),

@@ -40,13 +40,10 @@ class LoginRegisterScreen extends StatelessWidget {
                       SizedBox(
                         height: 50,
                       ),
-                      Hero(
-                        tag: 'Login',
-                        child: Icon(
-                          MyFlutterApp.icon,
-                          size: 80,
-                          color: primaryColor,
-                        ),
+                      Icon(
+                        MyFlutterApp.icon,
+                        size: 80,
+                        color: primaryColor,
                       ),
                     ],
                   ),
@@ -64,13 +61,10 @@ class LoginRegisterScreen extends StatelessWidget {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
-                      Hero(
-                        tag: 'Register',
-                        child: Icon(
-                          MyFlutterApp.icon2,
-                          size: 80,
-                          color: secondaryColor,
-                        ),
+                      Icon(
+                        MyFlutterApp.icon2,
+                        size: 80,
+                        color: secondaryColor,
                       ),
                       SizedBox(
                         height: 50,

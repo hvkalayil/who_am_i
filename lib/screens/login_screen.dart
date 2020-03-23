@@ -1,14 +1,22 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:whoami/service/custom_button.dart';
 import 'package:whoami/service/my_flutter_app_icons.dart';
-import 'package:whoami/service/textField.dart';
 
 import '../constants.dart';
 
-class LoginScreen extends StatelessWidget {
+class LoginScreen extends StatefulWidget {
   static String id = 'LoginScreen';
+
+  @override
+  _LoginScreenState createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+  var buttonTextDecor = TextDecoration.none;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -25,20 +33,10 @@ class LoginScreen extends StatelessWidget {
                   child: CircleAvatar(
                     backgroundColor: secondaryColor,
                     radius: 100,
-                    child: FlatButton(
-                      highlightColor: primaryColor,
-                      splashColor: primaryColor,
-                      onPressed: () {
-                        print('object');
-                      },
-                      child: Hero(
-                        tag: 'Register',
-                        child: Icon(
-                          MyFlutterApp.icon,
-                          size: 125,
-                          color: primaryColor,
-                        ),
-                      ),
+                    child: Icon(
+                      MyFlutterApp.icon,
+                      size: 125,
+                      color: primaryColor,
                     ),
                   ),
                 ),
@@ -56,14 +54,41 @@ class LoginScreen extends StatelessWidget {
                           const EdgeInsets.only(top: 40, left: 20, right: 20),
                       child: Column(
                         children: <Widget>[
-                          textField(
-                            text: 'User Name',
+                          Material(
+                            elevation: 5,
+                            shadowColor: Colors.black,
+                            borderRadius: BorderRadius.all(
+                              Radius.circular(40),
+                            ),
+                            child: TextField(
+                                onSubmitted: (value) {
+                                  FocusScope.of(context).nextFocus();
+                                },
+                                textInputAction: TextInputAction.next,
+                                textCapitalization: TextCapitalization.words,
+                                cursorColor: primaryColor,
+                                textAlign: TextAlign.center,
+                                decoration: textFieldDecor.copyWith(
+                                    labelText: 'UserName')),
                           ),
                           SizedBox(
                             height: 20,
                           ),
-                          textField(
-                            text: 'Password',
+                          Material(
+                            elevation: 5,
+                            shadowColor: Colors.black,
+                            borderRadius: BorderRadius.all(
+                              Radius.circular(40),
+                            ),
+                            child: TextField(
+                                obscureText: true,
+                                textInputAction: TextInputAction.go,
+                                textCapitalization: TextCapitalization.words,
+                                cursorColor: primaryColor,
+                                textAlign: TextAlign.center,
+                                decoration: textFieldDecor.copyWith(
+                                  labelText: 'Password',
+                                )),
                           ),
                           SizedBox(
                             height: 20,
@@ -83,12 +108,20 @@ class LoginScreen extends StatelessWidget {
                               SizedBox(
                                 width: 20,
                               ),
-                              Text(
-                                'Forgot Password?',
-                                style: TextStyle(
-                                    fontFamily: 'Bellotta',
-                                    color: primaryColor,
-                                    fontSize: 16),
+                              GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    buttonTextDecor = TextDecoration.underline;
+                                  });
+                                },
+                                child: Text(
+                                  'Forgot Password?',
+                                  style: TextStyle(
+                                      fontFamily: 'Bellotta',
+                                      color: primaryColor,
+                                      fontSize: 16,
+                                      decoration: buttonTextDecor),
+                                ),
                               ),
                             ],
                           )
