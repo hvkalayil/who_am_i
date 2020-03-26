@@ -19,7 +19,7 @@ class RegistrationScreen extends StatefulWidget {
 }
 
 class _RegistrationScreenState extends State<RegistrationScreen> {
-  File _image, _finalImage;
+  File _image;
   String path, userName, jobTitle;
 
   Icon getDefaultIcon() {
@@ -49,16 +49,31 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       image = await ImagePicker.pickImage(source: ImageSource.gallery);
 
     var filename = basename(image.path);
-    _finalImage = await image.copy('$path/$filename');
+    image = await image.copy('$path/$filename');
     setState(() {
-      _image = _finalImage;
+      _image = image;
     });
   }
 
-  onLoginClick() async {
-    SharedPrefUtils.saveStr('profileImage', _finalImage.path);
+  onNextClick() async {
+    if (_image == null) {
+      SharedPrefUtils.saveStr('profileImage', 'DEFAULT');
+    } else {
+      SharedPrefUtils.saveStr('profileImage', _image.path);
+    }
+
+    if (userName == null) {
+      doToast('Please enter your name');
+      return null;
+    }
+
+    if (jobTitle == null) {
+      doToast('Please enter your job title');
+      return null;
+    }
     SharedPrefUtils.saveStr('userName', userName);
     SharedPrefUtils.saveStr('jobTitle', jobTitle);
+    doVibrate();
     Navigator.pushNamed(this.context, SocialMediaSetupScreen.id);
   }
 
@@ -190,11 +205,14 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: <Widget>[
                         CustomButton(
+                          borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(20),
+                              bottomLeft: Radius.circular(20)),
                           buttonPadding: EdgeInsets.all(0),
                           textColor: secondaryColor,
                           buttonColor: primaryColor,
                           buttonText: 'NEXT >',
-                          onClick: () => onLoginClick(),
+                          onClick: () => onNextClick(),
                         )
                       ],
                     ),

@@ -26,6 +26,9 @@ dependencies:
   image_picker: ^0.6.3+4
   shared_preferences: ^0.5.6+3
   path_provider: ^1.6.5
+  vibration: ^1.2.4
+  fluttertoast: ^4.0.0
+
 
 dev_dependencies:
   flutter_test:

@@ -12,6 +12,18 @@
 ///       - asset: fonts/MyFlutterApp.ttf
 ///
 /// 
+/// * Elusive, Copyright (C) 2013 by Aristeides Stathopoulos
+///         Author:    Aristeides Stathopoulos
+///         License:   SIL (http://scripts.sil.org/OFL)
+///         Homepage:  http://aristeides.com/
+/// * Typicons, (c) Stephen Hutchings 2012
+///         Author:    Stephen Hutchings
+///         License:   SIL (http://scripts.sil.org/OFL)
+///         Homepage:  http://typicons.com/
+/// * Brandico, (C) 2012 by Vitaly Puzrin
+///         Author:    Crowdsourced, for Fontello project
+///         License:   SIL (http://scripts.sil.org/OFL)
+///         Homepage:  
 ///
 import 'package:flutter/widgets.dart';
 
@@ -22,4 +34,9 @@ class MyFlutterApp {
 
   static const IconData icon = IconData(0xe800, fontFamily: _kFontFam);
   static const IconData icon2 = IconData(0xe801, fontFamily: _kFontFam);
+  static const IconData facebook = IconData(0xe802, fontFamily: _kFontFam);
+  static const IconData linkedin = IconData(0xe803, fontFamily: _kFontFam);
+  static const IconData twitter = IconData(0xe804, fontFamily: _kFontFam);
+  static const IconData tiktok = IconData(0xe805, fontFamily: _kFontFam);
+  static const IconData instagram = IconData(0xf31e, fontFamily: _kFontFam);
 }

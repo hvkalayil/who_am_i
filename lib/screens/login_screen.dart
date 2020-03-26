@@ -97,10 +97,13 @@ class _LoginScreenState extends State<LoginScreen> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: <Widget>[
                               CustomButton(
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(20)),
                                 buttonPadding: EdgeInsets.all(0),
                                 buttonColor: primaryColor,
                                 buttonText: 'Login',
                                 onClick: () {
+                                  doVibrate();
                                   print('object');
                                 },
                                 textColor: secondaryColor,
@@ -110,6 +113,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                               GestureDetector(
                                 onTap: () {
+                                  doVibrate();
                                   setState(() {
                                     buttonTextDecor = TextDecoration.underline;
                                   });

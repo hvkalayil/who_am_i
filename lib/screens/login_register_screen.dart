@@ -24,6 +24,7 @@ class LoginRegisterScreen extends StatelessWidget {
                   splashColor: primaryColor.withAlpha(100),
                   highlightColor: primaryColor.withAlpha(50),
                   onPressed: () {
+                    doVibrate();
                     Navigator.pushNamed(context, LoginScreen.id);
                   },
                   child: Column(
@@ -56,6 +57,7 @@ class LoginRegisterScreen extends StatelessWidget {
                   highlightColor: secondaryColor.withAlpha(50),
                   color: primaryColor,
                   onPressed: () {
+                    doVibrate();
                     Navigator.pushNamed(context, RegistrationScreen.id);
                   },
                   child: Column(
