@@ -4,8 +4,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:whoami/constants.dart';
+import 'package:whoami/screens/doc_upload_screen.dart';
 import 'package:whoami/service/custom_button.dart';
 import 'package:whoami/service/my_flutter_app_icons.dart';
 import 'package:whoami/service/shared_prefs_util.dart';
@@ -17,12 +17,125 @@ class SocialMediaSetupScreen extends StatefulWidget {
 }
 
 class _SocialMediaSetupScreenState extends State<SocialMediaSetupScreen> {
-  bool facebookState = false,
+  bool isSocialMediaAddedd = false;
+  bool facebookState = true,
       instagramState = true,
       twitterState = true,
       linkedinState = true,
       tiktokState = true,
       mailState = true;
+  String fbName = '',
+      igName = '',
+      twitterName = '',
+      linkedinName = '',
+      tiktokName = '',
+      mailName = '';
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: primaryColor,
+      body: AnnotatedRegion<SystemUiOverlayStyle>(
+        value: SystemUiOverlayStyle(statusBarColor: primaryColor),
+        child: SafeArea(
+            child: Column(
+          children: <Widget>[
+            Flexible(
+              fit: FlexFit.loose,
+              flex: 4,
+              child: Container(
+                  child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Text(
+                    'Add your Social Media Profiles',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                        fontWeight: FontWeight.w900,
+                        decoration: TextDecoration.underline,
+                        fontSize: 36,
+                        color: secondaryColor,
+                        fontFamily: 'Bellotta'),
+                  ),
+                  Text(
+                    'You can skip this step if you want.\n Click on icons below to add them.',
+                    style: TextStyle(
+                        fontSize: 18,
+                        color: secondaryColor,
+                        fontFamily: 'Bellotta'),
+                  ),
+                  SizedBox(
+                    height: 12,
+                  ),
+                  Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: addSocialMediaIconSet()),
+                ],
+              )),
+            ),
+            Flexible(
+              flex: 5,
+              fit: FlexFit.loose,
+              child: Container(
+                  width: double.infinity,
+                  height: double.infinity,
+                  margin: EdgeInsets.symmetric(horizontal: 20),
+                  decoration: BoxDecoration(
+                      color: secondaryColor,
+                      borderRadius: BorderRadius.all(Radius.circular(20))),
+                  padding: EdgeInsets.only(top: 25),
+                  child: isSocialMediaAddedd
+                      ? ListView(
+                          children: addSocialMediaTextSet(),
+                        )
+                      : Center(
+                          child: Text(
+                            'No Social Media Seleted. Select one using the icons above.',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 26,
+                                color: primaryColor.withAlpha(120),
+                                fontFamily: 'Bellotta'),
+                          ),
+                        )),
+            ),
+            SizedBox(
+              height: 8,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                CustomButton(
+                  buttonText: '< PREVIOUS',
+                  onClick: () {
+                    doVibrate();
+                    Navigator.pop(context);
+                  },
+                  buttonColor: secondaryColor,
+                  textColor: primaryColor,
+                  buttonPadding: EdgeInsets.zero,
+                  borderRadius: BorderRadius.only(
+                      topRight: Radius.circular(20),
+                      bottomRight: Radius.circular(20)),
+                ),
+                CustomButton(
+                  buttonText: 'NEXT >',
+                  onClick: () => onNextClick(),
+                  buttonColor: secondaryColor,
+                  textColor: primaryColor,
+                  buttonPadding: EdgeInsets.zero,
+                  borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(20),
+                      bottomLeft: Radius.circular(20)),
+                ),
+              ],
+            )
+          ],
+        )),
+      ),
+    );
+  }
 
   ListTile makeTile(BuildContext context, IconData icon, String text,
       String hint, int index) {
@@ -40,7 +153,39 @@ class _SocialMediaSetupScreenState extends State<SocialMediaSetupScreen> {
           Radius.circular(40),
         ),
         child: TextField(
-            onChanged: (value) {},
+            onChanged: (value) {
+              switch (index) {
+                case 1:
+                  {
+                    fbName = value;
+                    break;
+                  }
+                case 2:
+                  {
+                    igName = value;
+                    break;
+                  }
+                case 3:
+                  {
+                    twitterName = value;
+                    break;
+                  }
+                case 4:
+                  {
+                    linkedinName = value;
+                    break;
+                  }
+                case 5:
+                  {
+                    tiktokName = value;
+                    break;
+                  }
+                case 6:
+                  {
+                    mailName = value;
+                  }
+              }
+            },
             onSubmitted: (value) {
               FocusScope.of(context).nextFocus();
             },
@@ -58,6 +203,7 @@ class _SocialMediaSetupScreenState extends State<SocialMediaSetupScreen> {
               {
                 setState(() {
                   facebookState = !facebookState;
+                  fbName = '';
                 });
                 break;
               }
@@ -65,6 +211,7 @@ class _SocialMediaSetupScreenState extends State<SocialMediaSetupScreen> {
               {
                 setState(() {
                   instagramState = !instagramState;
+                  igName = '';
                 });
                 break;
               }
@@ -72,6 +219,7 @@ class _SocialMediaSetupScreenState extends State<SocialMediaSetupScreen> {
               {
                 setState(() {
                   twitterState = !twitterState;
+                  twitterName = '';
                 });
                 break;
               }
@@ -79,6 +227,7 @@ class _SocialMediaSetupScreenState extends State<SocialMediaSetupScreen> {
               {
                 setState(() {
                   linkedinState = !linkedinState;
+                  linkedinName = '';
                 });
                 break;
               }
@@ -86,6 +235,7 @@ class _SocialMediaSetupScreenState extends State<SocialMediaSetupScreen> {
               {
                 setState(() {
                   tiktokState = !tiktokState;
+                  tiktokName = '';
                 });
                 break;
               }
@@ -93,9 +243,16 @@ class _SocialMediaSetupScreenState extends State<SocialMediaSetupScreen> {
               {
                 setState(() {
                   mailState = !mailState;
+                  mailName = '';
                 });
               }
           }
+          if (facebookState &&
+              instagramState &&
+              twitterState &&
+              linkedinState &&
+              tiktokState &&
+              mailState) isSocialMediaAddedd = false;
         },
         child: Icon(
           Icons.do_not_disturb_on,
@@ -113,6 +270,7 @@ class _SocialMediaSetupScreenState extends State<SocialMediaSetupScreen> {
             {
               setState(() {
                 facebookState = !facebookState;
+                isSocialMediaAddedd = true;
               });
               break;
             }
@@ -120,6 +278,7 @@ class _SocialMediaSetupScreenState extends State<SocialMediaSetupScreen> {
             {
               setState(() {
                 instagramState = !instagramState;
+                isSocialMediaAddedd = true;
               });
               break;
             }
@@ -127,6 +286,7 @@ class _SocialMediaSetupScreenState extends State<SocialMediaSetupScreen> {
             {
               setState(() {
                 twitterState = !twitterState;
+                isSocialMediaAddedd = true;
               });
               break;
             }
@@ -134,6 +294,7 @@ class _SocialMediaSetupScreenState extends State<SocialMediaSetupScreen> {
             {
               setState(() {
                 linkedinState = !linkedinState;
+                isSocialMediaAddedd = true;
               });
               break;
             }
@@ -141,6 +302,7 @@ class _SocialMediaSetupScreenState extends State<SocialMediaSetupScreen> {
             {
               setState(() {
                 tiktokState = !tiktokState;
+                isSocialMediaAddedd = true;
               });
               break;
             }
@@ -148,6 +310,7 @@ class _SocialMediaSetupScreenState extends State<SocialMediaSetupScreen> {
             {
               setState(() {
                 mailState = !mailState;
+                isSocialMediaAddedd = true;
               });
             }
         }
@@ -175,6 +338,7 @@ class _SocialMediaSetupScreenState extends State<SocialMediaSetupScreen> {
   }
 
   List<Widget> addSocialMediaTextSet() {
+    int flag = 1;
     List<Widget> socialMediaTextSet = [];
     if (!facebookState)
       socialMediaTextSet.add(makeTile(context, MyFlutterApp.facebook,
@@ -198,92 +362,40 @@ class _SocialMediaSetupScreenState extends State<SocialMediaSetupScreen> {
     return socialMediaTextSet;
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: primaryColor,
-      body: AnnotatedRegion<SystemUiOverlayStyle>(
-        value: SystemUiOverlayStyle(statusBarColor: primaryColor),
-        child: SafeArea(
-            child: Column(
-          children: <Widget>[
-            Flexible(
-              fit: FlexFit.loose,
-              flex: 4,
-              child: Container(
-                  child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Text(
-                    'Add your Social Media Profiles',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                        decoration: TextDecoration.underline,
-                        fontSize: 36,
-                        color: secondaryColor,
-                        fontFamily: 'Bellotta'),
-                  ),
-                  Text(
-                    'You can skip this step if you want.\n Click on icons below to add them.',
-                    style: TextStyle(
-                        fontSize: 18,
-                        color: secondaryColor,
-                        fontFamily: 'Bellotta'),
-                  ),
-                  SizedBox(
-                    height: 12,
-                  ),
-                  Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: addSocialMediaIconSet()),
-                ],
-              )),
-            ),
-            Flexible(
-              flex: 5,
-              fit: FlexFit.loose,
-              child: Container(
-                margin: EdgeInsets.symmetric(horizontal: 20),
-                decoration: BoxDecoration(
-                    color: secondaryColor,
-                    borderRadius: BorderRadius.all(Radius.circular(20))),
-                padding: EdgeInsets.only(top: 25),
-                child: ListView(
-                  children: addSocialMediaTextSet(),
-                ),
-              ),
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: <Widget>[
-                CustomButton(
-                  buttonText: '< PREVIOUS',
-                  onClick: () {
-                    doVibrate();
-                    Navigator.pop(context);
-                  },
-                  buttonColor: secondaryColor,
-                  textColor: primaryColor,
-                  buttonPadding: EdgeInsets.zero,
-                  borderRadius: BorderRadius.only(
-                      topRight: Radius.circular(20),
-                      bottomRight: Radius.circular(20)),
-                ),
-                CustomButton(
-                  buttonText: 'NEXT >',
-                  onClick: () {},
-                  buttonColor: secondaryColor,
-                  textColor: primaryColor,
-                  buttonPadding: EdgeInsets.zero,
-                  borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(20),
-                      bottomLeft: Radius.circular(20)),
-                ),
-              ],
-            )
-          ],
-        )),
-      ),
-    );
+  void onNextClick() {
+    //if state is false that means it is enabled
+
+    if (fbName == '' || fbName == null)
+      SharedPrefUtils.saveStr('fbName', def);
+    else
+      SharedPrefUtils.saveStr('fbName', fbName);
+
+    if (igName == '' || igName == null)
+      SharedPrefUtils.saveStr('igName', def);
+    else
+      SharedPrefUtils.saveStr('igName', igName);
+
+    if (twitterName == '' || twitterName == null)
+      SharedPrefUtils.saveStr('twitterName', def);
+    else
+      SharedPrefUtils.saveStr('twitterName', twitterName);
+
+    if (linkedinName == '' || linkedinName == null)
+      SharedPrefUtils.saveStr('linkedinName', def);
+    else
+      SharedPrefUtils.saveStr('linkedinName', linkedinName);
+
+    if (tiktokName == '' || tiktokName == null)
+      SharedPrefUtils.saveStr('tiktokName', def);
+    else
+      SharedPrefUtils.saveStr('tiktokName', tiktokName);
+
+    if (mailName == '' || mailName == null)
+      SharedPrefUtils.saveStr('mailName', def);
+    else
+      SharedPrefUtils.saveStr('mailName', mailName);
+
+    doVibrate();
+    Navigator.pushNamed(context, DocUploadScreen.id);
   }
 }

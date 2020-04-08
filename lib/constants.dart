@@ -4,6 +4,7 @@ import 'package:vibration/vibration.dart';
 
 final Color primaryColor = Colors.lightBlueAccent[100];
 final Color secondaryColor = Colors.white;
+const String def = 'DEFAULT';
 
 var textFieldDecor = InputDecoration(
   labelStyle: TextStyle(color: primaryColor, fontFamily: 'Bellotta'),

@@ -11,7 +11,7 @@
 ///      fonts:
 ///       - asset: fonts/MyFlutterApp.ttf
 ///
-/// 
+///
 /// * Elusive, Copyright (C) 2013 by Aristeides Stathopoulos
 ///         Author:    Aristeides Stathopoulos
 ///         License:   SIL (http://scripts.sil.org/OFL)
@@ -23,13 +23,13 @@
 /// * Brandico, (C) 2012 by Vitaly Puzrin
 ///         Author:    Crowdsourced, for Fontello project
 ///         License:   SIL (http://scripts.sil.org/OFL)
-///         Homepage:  
+///         Homepage:
 ///
 import 'package:flutter/widgets.dart';
+import 'package:flutter_iconpicker/Models/IconPack.dart';
 
 class MyFlutterApp {
   MyFlutterApp._();
-
   static const _kFontFam = 'MyFlutterApp';
 
   static const IconData icon = IconData(0xe800, fontFamily: _kFontFam);

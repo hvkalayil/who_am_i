@@ -18,7 +18,7 @@ class LoginRegisterScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
               Expanded(
-                flex: 2,
+                flex: 1,
                 child: FlatButton(
                   color: secondaryColor,
                   splashColor: primaryColor.withAlpha(100),
@@ -51,7 +51,7 @@ class LoginRegisterScreen extends StatelessWidget {
                 ),
               ),
               Expanded(
-                flex: 2,
+                flex: 1,
                 child: FlatButton(
                   splashColor: secondaryColor.withAlpha(100),
                   highlightColor: secondaryColor.withAlpha(50),
