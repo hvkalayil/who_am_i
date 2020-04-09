@@ -26,31 +26,11 @@ class _LandingScreenState extends State<LandingScreen> {
       tiktokName,
       mailName;
   List<String> files, titles;
-  bool isImageExist = false, isJobExist = false, isSocialExist = false;
+  bool isImageExist = false,
+      isJobExist = false,
+      isSocialExist = false,
+      isFileExist = false;
   void initJobs() async {
-    //Get all data from SharedPrefs
-    /*
-    profileImage,
-    userName
-    jobTitle
-    fbName
-    igName
-    twitterName
-    linkedinName
-    tiktokName
-    mailName
-    titles
-    files
-     */
-//    profileImage = '';
-//    userName = '';
-//    jobTitle = '';
-//    fbName = '';
-//    igName = '';
-//    twitterName = '';
-//    linkedinName = '';
-//    tiktokName = '';
-//    mailName = '';
     profileImage = await SharedPrefUtils.readPrefStr('profileImage');
     if (profileImage != def) {
       setState(() {
@@ -82,10 +62,10 @@ class _LandingScreenState extends State<LandingScreen> {
     }
     titles = await SharedPrefUtils.readPrefStrList('titles');
     files = await SharedPrefUtils.readPrefStrList('files');
-
-    setState(() {
-      print('$profileImage $userName $jobTitle $fbName $igName');
-    });
+    if (titles.isNotEmpty && files.isNotEmpty)
+      setState(() {
+        isFileExist = true;
+      });
     return;
   }
 
@@ -93,6 +73,137 @@ class _LandingScreenState extends State<LandingScreen> {
   void initState() {
     initJobs();
     super.initState();
+  }
+
+//  getFiles({int index}){
+//    for(int i=index; i<index+3; i++){
+//      if(files.)
+//    }
+//  }
+  getFiles() {
+    List<Widget> socialIcons = [];
+    if (fbName != def) {
+      String fbProfile = fbName.replaceAll(' ', '.');
+      String url = 'https://www.facebook.com/$fbProfile';
+      socialIcons.add(makeFiles(ico: MyFlutterApp.facebook, link: url));
+    }
+    if (igName != def) {
+      String url = 'https://www.instagram.com/$igName';
+      socialIcons.add(makeFiles(ico: MyFlutterApp.instagram, link: url));
+    }
+    if (twitterName != def) {
+      String url = 'https://twitter.com/$twitterName';
+      socialIcons.add(makeFiles(ico: MyFlutterApp.twitter, link: url));
+    }
+    return socialIcons;
+  }
+
+  makeFiles({IconData ico, String link}) {
+    return ListTile(
+      title: GestureDetector(
+          onTap: () async {
+            if (await canLaunch(link)) {
+              bool nativeLaunch = await launch(
+                link,
+                forceSafariVC: false,
+                forceWebView: false,
+                universalLinksOnly: true,
+              );
+              if (!nativeLaunch) {
+                await launch(link, forceWebView: true, forceSafariVC: true);
+              }
+            } else {
+              throw 'Could not launch $link';
+            }
+          },
+          child: CircleAvatar(
+              radius: 32,
+              backgroundColor: secondaryColor,
+              child: Icon(
+                ico,
+                color: primaryColor,
+                size: 32,
+              ))),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: primaryColor,
+      body: AnnotatedRegion<SystemUiOverlayStyle>(
+        value: SystemUiOverlayStyle(statusBarColor: primaryColor),
+        child: SafeArea(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  CircleAvatar(
+                      radius: 100,
+                      backgroundColor: secondaryColor,
+                      child:
+                          isImageExist ? getProfileIcon() : getDefaultIcon()),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  Text(
+                    userName,
+                    style: TextStyle(
+                        fontFamily: 'Bellotta',
+                        color: secondaryColor,
+                        fontSize: 30),
+                  ),
+                  Container(
+                    child: isJobExist
+                        ? getJob()
+                        : Container(color: secondaryColor),
+                  ),
+                  SizedBox(
+                    height: 40,
+                  ),
+                  Container(
+                    child: isSocialExist
+                        ? Container(
+                            padding: EdgeInsets.all(20),
+                            decoration: BoxDecoration(
+                                border:
+                                    Border.all(color: secondaryColor, width: 5),
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(20))),
+                            child: Column(
+                              children: <Widget>[
+                                Row(children: getSocialIcons1()),
+                                Row(children: getSocialIcons2())
+                              ],
+                            ))
+                        : SizedBox(height: 0),
+                  ),
+                  Container(
+                    child: isFileExist
+                        ? Container(
+                            padding: EdgeInsets.all(20),
+                            decoration: BoxDecoration(
+                                border:
+                                    Border.all(color: secondaryColor, width: 5),
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(20))),
+                            child: Column(
+                              children: <Widget>[
+                                Row(children: getSocialIcons1()),
+                                Row(children: getSocialIcons2())
+                              ],
+                            ))
+                        : SizedBox(height: 0),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   Container getProfileIcon() {
@@ -123,8 +234,8 @@ class _LandingScreenState extends State<LandingScreen> {
     );
   }
 
-  getSocialIcons() {
-    List<GestureDetector> socialIcons = [];
+  getSocialIcons1() {
+    List<Widget> socialIcons = [];
     if (fbName != def) {
       String fbProfile = fbName.replaceAll(' ', '.');
       String url = 'https://www.facebook.com/$fbProfile';
@@ -138,6 +249,11 @@ class _LandingScreenState extends State<LandingScreen> {
       String url = 'https://twitter.com/$twitterName';
       socialIcons.add(makeSocial(ico: MyFlutterApp.twitter, link: url));
     }
+    return socialIcons;
+  }
+
+  getSocialIcons2() {
+    List<Widget> socialIcons = [];
     if (linkedinName != def) {
       String linProfile = linkedinName.replaceAll(' ', '%20');
       String url =
@@ -154,74 +270,33 @@ class _LandingScreenState extends State<LandingScreen> {
     return socialIcons;
   }
 
-  GestureDetector makeSocial({IconData ico, String link}) {
-    return GestureDetector(
-        onTap: () async {
-          if (await canLaunch(link)) {
-            bool nativeLaunch = await launch(
-              link,
-              forceSafariVC: false,
-              forceWebView: false,
-              universalLinksOnly: true,
-            );
-            if (!nativeLaunch) {
-              await launch(link, forceWebView: true, forceSafariVC: true);
+  makeSocial({IconData ico, String link}) {
+    return Padding(
+      padding: const EdgeInsets.all(4.0),
+      child: GestureDetector(
+          onTap: () async {
+            if (await canLaunch(link)) {
+              bool nativeLaunch = await launch(
+                link,
+                forceSafariVC: false,
+                forceWebView: false,
+                universalLinksOnly: true,
+              );
+              if (!nativeLaunch) {
+                await launch(link, forceWebView: true, forceSafariVC: true);
+              }
+            } else {
+              throw 'Could not launch $link';
             }
-          } else {
-            throw 'Could not launch $link';
-          }
-        },
-        child: CircleAvatar(
-            radius: 32,
-            backgroundColor: secondaryColor,
-            child: Icon(
-              ico,
-              color: primaryColor,
-            )));
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: primaryColor,
-      body: AnnotatedRegion<SystemUiOverlayStyle>(
-        value: SystemUiOverlayStyle(statusBarColor: primaryColor),
-        child: SafeArea(
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: <Widget>[
-                  CircleAvatar(
-                      radius: 100,
-                      backgroundColor: secondaryColor,
-                      child:
-                          isImageExist ? getProfileIcon() : getDefaultIcon()),
-                  Text(
-                    userName,
-                    style: TextStyle(
-                        fontFamily: 'Bellotta',
-                        color: secondaryColor,
-                        fontSize: 30),
-                  ),
-                  Container(
-                    child: isJobExist
-                        ? getJob()
-                        : Container(color: secondaryColor),
-                  ),
-                  Container(
-                    child: isSocialExist
-                        ? Row(children: getSocialIcons())
-                        : Container(color: secondaryColor),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
+          },
+          child: CircleAvatar(
+              radius: 32,
+              backgroundColor: secondaryColor,
+              child: Icon(
+                ico,
+                color: primaryColor,
+                size: 32,
+              ))),
     );
   }
 }
