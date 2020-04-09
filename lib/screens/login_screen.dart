@@ -104,7 +104,6 @@ class _LoginScreenState extends State<LoginScreen> {
                                 buttonText: 'Login',
                                 onClick: () {
                                   doVibrate();
-                                  print('object');
                                 },
                                 textColor: secondaryColor,
                               ),

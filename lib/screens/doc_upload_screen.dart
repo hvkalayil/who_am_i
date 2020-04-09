@@ -1,17 +1,15 @@
 import 'dart:io';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter_iconpicker/Models/IconPack.dart';
-import 'package:flutter_iconpicker/flutter_iconpicker.dart';
-import 'package:open_file/open_file.dart';
-import 'package:path/path.dart';
+
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:open_file/open_file.dart';
+import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:whoami/service/alert_dialog.dart';
+import 'package:whoami/screens/landing_screen.dart';
 import 'package:whoami/service/custom_button.dart';
-import 'package:whoami/service/my_flutter_app_icons.dart';
 import 'package:whoami/service/shared_prefs_util.dart';
 
 import '../constants.dart';
@@ -31,94 +29,6 @@ class DocUploadScreen extends StatefulWidget {
 }
 
 class _DocUploadScreenState extends State<DocUploadScreen> {
-  void addClick(BuildContext context) async {
-    await showDialog(
-        context: context,
-        builder: (_) {
-          return CreateAlertDialog();
-        });
-    Navigator.popAndPushNamed(context, DocUploadScreen.id);
-  }
-
-  Container makeButton(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.only(top: 20, left: 0, right: 0, bottom: 0),
-      child: RaisedButton(
-        shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(40))),
-        color: secondaryColor,
-        onPressed: () => addClick(context),
-        textTheme: ButtonTextTheme.accent,
-        padding: EdgeInsets.all(20),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Icon(
-              Icons.add,
-              color: primaryColor,
-            ),
-            Text(
-              'Add Document',
-              style: TextStyle(
-                  fontSize: 18, color: primaryColor, fontFamily: 'Bellotta'),
-            )
-          ],
-        ),
-      ),
-    );
-  }
-
-  List<ListTile> makeDocList() {
-    List<ListTile> docList = [];
-    for (int i = 0; i < fileAdded; i++) {
-      String title = titleList[i];
-      String fpath = documents[i].path;
-      print(fpath);
-      docList.add(makeSingleTile(text: title, filePath: fpath));
-    }
-    return docList;
-  }
-
-  ListTile makeSingleTile({String text, String filePath}) {
-    return ListTile(
-      title: RaisedButton(
-        onPressed: () async {
-          final result = await OpenFile.open(filePath);
-          print(result);
-        },
-        padding: EdgeInsets.all(16),
-        color: primaryColor,
-        child: Text(
-          text,
-          style: TextStyle(color: secondaryColor),
-        ),
-      ),
-      trailing: GestureDetector(
-        onTap: () {
-          setState(() {
-            if (fileAdded == 1) isFileThere = false;
-            fileAdded--;
-            documents.removeLast();
-            titleList.removeLast();
-          });
-        },
-        child: Icon(
-          Icons.cancel,
-          color: Colors.red,
-        ),
-      ),
-    );
-  }
-
-  onFinishClick() {
-    List<String> tempDoc;
-    for (int i = 0; i < fileAdded; i++) {
-      tempDoc.add(documents[i].path);
-    }
-    SharedPrefUtils.saveStrList('titles', titleList);
-    SharedPrefUtils.saveStrList('files', tempDoc);
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -207,10 +117,7 @@ class _DocUploadScreenState extends State<DocUploadScreen> {
                   CustomButton(
                     buttonText: 'FINISH',
                     onClick: () {
-                      for (int i = 0; i < fileAdded; i++) {
-                        print(documents[i]);
-                        print(titleList[i]);
-                      }
+                      onFinishClick(context);
                     },
                     buttonColor: secondaryColor,
                     textColor: primaryColor,
@@ -226,6 +133,98 @@ class _DocUploadScreenState extends State<DocUploadScreen> {
         ),
       ),
     );
+  }
+
+  void addClick(BuildContext context) async {
+    await showDialog(
+        context: context,
+        builder: (_) {
+          return CreateAlertDialog();
+        });
+    Navigator.popAndPushNamed(context, DocUploadScreen.id);
+  }
+
+  Container makeButton(BuildContext context) {
+    return Container(
+      margin: EdgeInsets.only(top: 20, left: 0, right: 0, bottom: 0),
+      child: RaisedButton(
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(40))),
+        color: secondaryColor,
+        onPressed: () => addClick(context),
+        textTheme: ButtonTextTheme.accent,
+        padding: EdgeInsets.all(20),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Icon(
+              Icons.add,
+              color: primaryColor,
+            ),
+            Text(
+              'Add Document',
+              style: TextStyle(
+                  fontSize: 18, color: primaryColor, fontFamily: 'Bellotta'),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  List<ListTile> makeDocList() {
+    List<ListTile> docList = [];
+    for (int i = 0; i < fileAdded; i++) {
+      String title = titleList[i];
+      String fpath = documents[i].path;
+      docList.add(makeSingleTile(text: title, filePath: fpath));
+    }
+    return docList;
+  }
+
+  ListTile makeSingleTile({String text, String filePath}) {
+    return ListTile(
+      title: RaisedButton(
+        onPressed: () async {
+          final result = await OpenFile.open(filePath);
+        },
+        padding: EdgeInsets.all(16),
+        color: primaryColor,
+        child: Text(
+          text,
+          style: TextStyle(color: secondaryColor),
+        ),
+      ),
+      trailing: GestureDetector(
+        onTap: () {
+          setState(() {
+            if (fileAdded == 1) isFileThere = false;
+            fileAdded--;
+            documents.removeLast();
+            titleList.removeLast();
+          });
+        },
+        child: Icon(
+          Icons.cancel,
+          color: Colors.red,
+        ),
+      ),
+    );
+  }
+
+  onFinishClick(BuildContext context) {
+    if (fileAdded == 0) {
+      SharedPrefUtils.saveStrList('titles', ['Default']);
+      SharedPrefUtils.saveStrList('files', ['Default']);
+    } else {
+      List<String> tempDoc;
+      for (int i = 0; i < fileAdded; i++) {
+        tempDoc.add(documents[i].path);
+      }
+      SharedPrefUtils.saveStrList('titles', titleList);
+      SharedPrefUtils.saveStrList('files', tempDoc);
+    }
+    Navigator.pushNamed(context, LandingScreen.id);
   }
 }
 
@@ -263,9 +262,6 @@ class _CreateAlertDialogState extends State<CreateAlertDialog> {
         documents.add(file);
         fileAdded++;
         isFileThere = true;
-        print(fileAdded);
-        print(docTitle);
-        print(documents);
       });
       Navigator.of(context, rootNavigator: true).pop();
     }

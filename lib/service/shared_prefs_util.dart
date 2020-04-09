@@ -16,6 +16,11 @@ class SharedPrefUtils {
     return pref.getString(key);
   }
 
+  static readPrefStrList(String key) async {
+    final SharedPreferences pref = await SharedPreferences.getInstance();
+    return pref.getStringList(key);
+  }
+
   static getPrefKeys() async {
     final SharedPreferences pref = await SharedPreferences.getInstance();
     return pref.getKeys();
