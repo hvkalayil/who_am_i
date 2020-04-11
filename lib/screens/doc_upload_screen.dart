@@ -186,7 +186,7 @@ class _DocUploadScreenState extends State<DocUploadScreen> {
     return ListTile(
       title: RaisedButton(
         onPressed: () async {
-          final result = await OpenFile.open(filePath);
+          await OpenFile.open(filePath);
         },
         padding: EdgeInsets.all(16),
         color: primaryColor,
@@ -217,7 +217,7 @@ class _DocUploadScreenState extends State<DocUploadScreen> {
       SharedPrefUtils.saveStrList('titles', ['Default']);
       SharedPrefUtils.saveStrList('files', ['Default']);
     } else {
-      List<String> tempDoc;
+      List<String> tempDoc = [];
       for (int i = 0; i < fileAdded; i++) {
         tempDoc.add(documents[i].path);
       }

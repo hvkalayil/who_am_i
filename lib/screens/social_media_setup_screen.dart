@@ -338,7 +338,6 @@ class _SocialMediaSetupScreenState extends State<SocialMediaSetupScreen> {
   }
 
   List<Widget> addSocialMediaTextSet() {
-    int flag = 1;
     List<Widget> socialMediaTextSet = [];
     if (!facebookState)
       socialMediaTextSet.add(makeTile(context, MyFlutterApp.facebook,

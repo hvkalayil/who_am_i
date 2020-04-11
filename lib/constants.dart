@@ -37,13 +37,14 @@ void doVibrate() async {
   }
 }
 
-void doToast(String message) {
+void doToast(String message,
+    {Color bg = Colors.lightBlueAccent, Color txt = Colors.white}) {
   Fluttertoast.showToast(
       msg: message,
       toastLength: Toast.LENGTH_SHORT,
       gravity: ToastGravity.CENTER,
       timeInSecForIosWeb: 1,
-      backgroundColor: primaryColor,
-      textColor: secondaryColor,
+      backgroundColor: bg,
+      textColor: txt,
       fontSize: 20.0);
 }

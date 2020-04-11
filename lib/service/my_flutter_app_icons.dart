@@ -11,7 +11,7 @@
 ///      fonts:
 ///       - asset: fonts/MyFlutterApp.ttf
 ///
-///
+/// 
 /// * Elusive, Copyright (C) 2013 by Aristeides Stathopoulos
 ///         Author:    Aristeides Stathopoulos
 ///         License:   SIL (http://scripts.sil.org/OFL)
@@ -23,20 +23,25 @@
 /// * Brandico, (C) 2012 by Vitaly Puzrin
 ///         Author:    Crowdsourced, for Fontello project
 ///         License:   SIL (http://scripts.sil.org/OFL)
-///         Homepage:
+///         Homepage:  
 ///
 import 'package:flutter/widgets.dart';
-import 'package:flutter_iconpicker/Models/IconPack.dart';
 
 class MyFlutterApp {
   MyFlutterApp._();
-  static const _kFontFam = 'MyFlutterApp';
 
-  static const IconData icon = IconData(0xe800, fontFamily: _kFontFam);
-  static const IconData icon2 = IconData(0xe801, fontFamily: _kFontFam);
-  static const IconData facebook = IconData(0xe802, fontFamily: _kFontFam);
-  static const IconData linkedin = IconData(0xe803, fontFamily: _kFontFam);
-  static const IconData twitter = IconData(0xe804, fontFamily: _kFontFam);
-  static const IconData tiktok = IconData(0xe805, fontFamily: _kFontFam);
-  static const IconData instagram = IconData(0xf31e, fontFamily: _kFontFam);
+  static const _kFontFam = 'MyFlutterApp';
+  static const _kFontPkg = null;
+
+  static const IconData icon = const IconData(0xe800, fontFamily: _kFontFam, fontPackage: _kFontPkg);
+  static const IconData icon2 = const IconData(0xe801, fontFamily: _kFontFam, fontPackage: _kFontPkg);
+  static const IconData facebook = const IconData(0xe802, fontFamily: _kFontFam, fontPackage: _kFontPkg);
+  static const IconData linkedin = const IconData(0xe803, fontFamily: _kFontFam, fontPackage: _kFontPkg);
+  static const IconData twitter = const IconData(0xe804, fontFamily: _kFontFam, fontPackage: _kFontPkg);
+  static const IconData tiktok = const IconData(0xe805, fontFamily: _kFontFam, fontPackage: _kFontPkg);
+  static const IconData driving = const IconData(0xe806, fontFamily: _kFontFam, fontPackage: _kFontPkg);
+  static const IconData id = const IconData(0xe807, fontFamily: _kFontFam, fontPackage: _kFontPkg);
+  static const IconData pan = const IconData(0xe808, fontFamily: _kFontFam, fontPackage: _kFontPkg);
+  static const IconData uid = const IconData(0xe809, fontFamily: _kFontFam, fontPackage: _kFontPkg);
+  static const IconData instagram = const IconData(0xf31e, fontFamily: _kFontFam, fontPackage: _kFontPkg);
 }

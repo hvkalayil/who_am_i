@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:open_file/open_file.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:whoami/service/my_flutter_app_icons.dart';
 import 'package:whoami/service/shared_prefs_util.dart';
@@ -30,6 +31,7 @@ class _LandingScreenState extends State<LandingScreen> {
       isJobExist = false,
       isSocialExist = false,
       isFileExist = false;
+  int n;
   void initJobs() async {
     profileImage = await SharedPrefUtils.readPrefStr('profileImage');
     if (profileImage != def) {
@@ -75,55 +77,89 @@ class _LandingScreenState extends State<LandingScreen> {
     super.initState();
   }
 
-//  getFiles({int index}){
-//    for(int i=index; i<index+3; i++){
-//      if(files.)
-//    }
-//  }
   getFiles() {
-    List<Widget> socialIcons = [];
-    if (fbName != def) {
-      String fbProfile = fbName.replaceAll(' ', '.');
-      String url = 'https://www.facebook.com/$fbProfile';
-      socialIcons.add(makeFiles(ico: MyFlutterApp.facebook, link: url));
-    }
-    if (igName != def) {
-      String url = 'https://www.instagram.com/$igName';
-      socialIcons.add(makeFiles(ico: MyFlutterApp.instagram, link: url));
-    }
-    if (twitterName != def) {
-      String url = 'https://twitter.com/$twitterName';
-      socialIcons.add(makeFiles(ico: MyFlutterApp.twitter, link: url));
-    }
-    return socialIcons;
+    setState(() {
+      n = 0;
+    });
+    return divideFiles();
   }
 
-  makeFiles({IconData ico, String link}) {
-    return ListTile(
-      title: GestureDetector(
-          onTap: () async {
-            if (await canLaunch(link)) {
-              bool nativeLaunch = await launch(
-                link,
-                forceSafariVC: false,
-                forceWebView: false,
-                universalLinksOnly: true,
-              );
-              if (!nativeLaunch) {
-                await launch(link, forceWebView: true, forceSafariVC: true);
-              }
-            } else {
-              throw 'Could not launch $link';
-            }
-          },
-          child: CircleAvatar(
-              radius: 32,
-              backgroundColor: secondaryColor,
-              child: Icon(
-                ico,
-                color: primaryColor,
-                size: 32,
-              ))),
+  divideFiles() {
+    List<Widget> fileSet = [];
+    int n = files.length;
+    if (n / 3 >= 1) {
+      for (int i = 1; i <= n / 3; i++) {
+        fileSet.add(makeFilesRow(itr: 3));
+      }
+      int x = (n - (n / 3)) as int;
+      if (x > 0) {
+        fileSet.add(makeFilesRow(itr: x));
+      }
+    } else {
+      fileSet.add(makeFilesRow(itr: n));
+    }
+    return Column(
+      children: fileSet,
+    );
+  }
+
+  makeFilesRow({int itr}) {
+    List<Widget> filesRow = [];
+    IconData fileIcon;
+    for (int i = 1; i <= itr; i++) {
+      fileIcon = findIcon(index: n);
+      String text = titles.elementAt(n);
+      filesRow.add(makeFilesRowElement(index: n, ico: fileIcon, title: text));
+      setState(() {
+        n++;
+      });
+    }
+    return Row(
+      children: filesRow,
+    );
+  }
+
+  findIcon({int index}) {
+    String title = titles.elementAt(index).toUpperCase();
+    IconData ico;
+
+    if (title.contains('LICENSE') || title.contains('DRIVING')) {
+      ico = MyFlutterApp.driving;
+    } else if (title.contains('AADHAR') ||
+        title.contains('ADHAR') ||
+        title.contains('UID')) {
+      ico = MyFlutterApp.uid;
+    } else if (title.contains('PAN')) {
+      ico = MyFlutterApp.pan;
+    } else {
+      ico = MyFlutterApp.id;
+    }
+
+    return ico;
+  }
+
+  makeFilesRowElement({int index, IconData ico, String title}) {
+    return Padding(
+      padding: const EdgeInsets.all(4.0),
+      child: GestureDetector(
+        onLongPress: () {
+          doToast(title, bg: secondaryColor, txt: primaryColor);
+        },
+        onTap: () async {
+          await OpenFile.open(files.elementAt(index));
+        },
+        child: Container(
+          padding: EdgeInsets.symmetric(vertical: 0, horizontal: 10),
+          decoration: BoxDecoration(
+              color: secondaryColor,
+              borderRadius: BorderRadius.all(Radius.circular(10))),
+          child: Icon(
+            ico,
+            color: primaryColor,
+            size: 60,
+          ),
+        ),
+      ),
     );
   }
 
@@ -180,6 +216,9 @@ class _LandingScreenState extends State<LandingScreen> {
                             ))
                         : SizedBox(height: 0),
                   ),
+                  SizedBox(
+                    height: 20,
+                  ),
                   Container(
                     child: isFileExist
                         ? Container(
@@ -189,12 +228,7 @@ class _LandingScreenState extends State<LandingScreen> {
                                     Border.all(color: secondaryColor, width: 5),
                                 borderRadius:
                                     BorderRadius.all(Radius.circular(20))),
-                            child: Column(
-                              children: <Widget>[
-                                Row(children: getSocialIcons1()),
-                                Row(children: getSocialIcons2())
-                              ],
-                            ))
+                            child: getFiles())
                         : SizedBox(height: 0),
                   ),
                 ],
