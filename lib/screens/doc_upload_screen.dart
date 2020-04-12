@@ -173,16 +173,18 @@ class _DocUploadScreenState extends State<DocUploadScreen> {
   }
 
   List<ListTile> makeDocList() {
+    int n = 0;
     List<ListTile> docList = [];
     for (int i = 0; i < fileAdded; i++) {
       String title = titleList[i];
       String fpath = documents[i].path;
-      docList.add(makeSingleTile(text: title, filePath: fpath));
+      docList.add(makeSingleTile(text: title, filePath: fpath, index: n));
+      n++;
     }
     return docList;
   }
 
-  ListTile makeSingleTile({String text, String filePath}) {
+  ListTile makeSingleTile({String text, String filePath, int index}) {
     return ListTile(
       title: RaisedButton(
         onPressed: () async {
@@ -199,9 +201,9 @@ class _DocUploadScreenState extends State<DocUploadScreen> {
         onTap: () {
           setState(() {
             if (fileAdded == 1) isFileThere = false;
+            documents.removeAt(index);
+            titleList.removeAt(index);
             fileAdded--;
-            documents.removeLast();
-            titleList.removeLast();
           });
         },
         child: Icon(

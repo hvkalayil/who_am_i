@@ -31,7 +31,8 @@ class _LandingScreenState extends State<LandingScreen> {
       isJobExist = false,
       isSocialExist = false,
       isFileExist = false;
-  int n;
+  int n = 0;
+
   void initJobs() async {
     profileImage = await SharedPrefUtils.readPrefStr('profileImage');
     if (profileImage != def) {
@@ -64,7 +65,7 @@ class _LandingScreenState extends State<LandingScreen> {
     }
     titles = await SharedPrefUtils.readPrefStrList('titles');
     files = await SharedPrefUtils.readPrefStrList('files');
-    if (titles.isNotEmpty && files.isNotEmpty)
+    if (titles.elementAt(0) != 'Default' || files.elementAt(0) != 'Default')
       setState(() {
         isFileExist = true;
       });
@@ -78,29 +79,28 @@ class _LandingScreenState extends State<LandingScreen> {
   }
 
   getFiles() {
-    setState(() {
-      n = 0;
-    });
     return divideFiles();
   }
 
   divideFiles() {
     List<Widget> fileSet = [];
-    int n = files.length;
-    if (n / 3 >= 1) {
-      for (int i = 1; i <= n / 3; i++) {
-        fileSet.add(makeFilesRow(itr: 3));
+    int m = files.length;
+    if (m >= 0) {
+      if (m / 3 >= 1) {
+        for (int i = 1; i <= m / 3; i++) {
+          fileSet.add(makeFilesRow(itr: 3));
+        }
+        int x = (m % 3).toInt();
+        if (x > 0) {
+          fileSet.add(makeFilesRow(itr: x));
+        }
+      } else {
+        fileSet.add(makeFilesRow(itr: m));
       }
-      int x = (n - (n / 3)) as int;
-      if (x > 0) {
-        fileSet.add(makeFilesRow(itr: x));
-      }
-    } else {
-      fileSet.add(makeFilesRow(itr: n));
+      return Column(
+        children: fileSet,
+      );
     }
-    return Column(
-      children: fileSet,
-    );
   }
 
   makeFilesRow({int itr}) {
@@ -110,9 +110,7 @@ class _LandingScreenState extends State<LandingScreen> {
       fileIcon = findIcon(index: n);
       String text = titles.elementAt(n);
       filesRow.add(makeFilesRowElement(index: n, ico: fileIcon, title: text));
-      setState(() {
-        n++;
-      });
+      n++;
     }
     return Row(
       children: filesRow,
@@ -309,6 +307,11 @@ class _LandingScreenState extends State<LandingScreen> {
       padding: const EdgeInsets.all(4.0),
       child: GestureDetector(
           onTap: () async {
+            if (ico == Icons.mail_outline) {
+              if (await canLaunch("mailto:$link")) {
+                await launch("mailto:$link");
+              }
+            }
             if (await canLaunch(link)) {
               bool nativeLaunch = await launch(
                 link,

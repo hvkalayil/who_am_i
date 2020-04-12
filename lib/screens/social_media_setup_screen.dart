@@ -74,7 +74,7 @@ class _SocialMediaSetupScreenState extends State<SocialMediaSetupScreen> {
               )),
             ),
             Flexible(
-              flex: 5,
+              flex: 6,
               fit: FlexFit.loose,
               child: Container(
                   width: double.infinity,
@@ -83,10 +83,11 @@ class _SocialMediaSetupScreenState extends State<SocialMediaSetupScreen> {
                   decoration: BoxDecoration(
                       color: secondaryColor,
                       borderRadius: BorderRadius.all(Radius.circular(20))),
-                  padding: EdgeInsets.only(top: 25),
+                  padding: EdgeInsets.only(top: 10),
                   child: isSocialMediaAddedd
                       ? ListView(
                           children: addSocialMediaTextSet(),
+                          physics: BouncingScrollPhysics(),
                         )
                       : Center(
                           child: Text(
@@ -137,10 +138,10 @@ class _SocialMediaSetupScreenState extends State<SocialMediaSetupScreen> {
     );
   }
 
-  ListTile makeTile(BuildContext context, IconData icon, String text,
-      String hint, int index) {
+  makeTile(BuildContext context, IconData icon, String text, String hint,
+      int index) {
     return ListTile(
-      contentPadding: EdgeInsets.only(bottom: 15, left: 20, right: 10),
+      contentPadding: EdgeInsets.only(bottom: 15, left: 20, right: 10, top: 10),
       leading: Icon(
         icon,
         size: 40,
@@ -339,26 +340,46 @@ class _SocialMediaSetupScreenState extends State<SocialMediaSetupScreen> {
 
   List<Widget> addSocialMediaTextSet() {
     List<Widget> socialMediaTextSet = [];
-    if (!facebookState)
+    if (!facebookState) {
       socialMediaTextSet.add(makeTile(context, MyFlutterApp.facebook,
           'Facebook', 'Enter your User Name', 1));
-    if (!instagramState)
+      socialMediaTextSet.add(makeDivider());
+    }
+    if (!instagramState) {
       socialMediaTextSet.add(makeTile(context, MyFlutterApp.instagram,
           'Instagram', 'Enter your IG handle', 2));
-    if (!twitterState)
+      socialMediaTextSet.add(makeDivider());
+    }
+    if (!twitterState) {
       socialMediaTextSet.add(makeTile(context, MyFlutterApp.twitter, 'Twitter',
           'Enter your Twitter handle', 3));
-    if (!linkedinState)
+      socialMediaTextSet.add(makeDivider());
+    }
+    if (!linkedinState) {
       socialMediaTextSet.add(makeTile(context, MyFlutterApp.linkedin,
           'LinkedIn', 'Enter your User Name', 4));
-    if (!tiktokState)
+      socialMediaTextSet.add(makeDivider());
+    }
+    if (!tiktokState) {
       socialMediaTextSet.add(makeTile(context, MyFlutterApp.tiktok, 'Tiktok',
           'Enter your Tiktok handle', 5));
-    if (!mailState)
+      socialMediaTextSet.add(makeDivider());
+    }
+    if (!mailState) {
       socialMediaTextSet.add(makeTile(
           context, Icons.mail_outline, 'Gmail', 'Enter your Gmail address', 6));
+    }
 
     return socialMediaTextSet;
+  }
+
+  makeDivider() {
+    return Divider(
+      color: Colors.blueGrey.withAlpha(50),
+      thickness: 2,
+      indent: 20,
+      endIndent: 20,
+    );
   }
 
   void onNextClick() {
