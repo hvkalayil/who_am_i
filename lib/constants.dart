@@ -5,6 +5,7 @@ import 'package:vibration/vibration.dart';
 final Color primaryColor = Colors.lightBlueAccent[100];
 final Color secondaryColor = Colors.white;
 const String def = 'DEFAULT';
+const String noFormat = 'NOFORMAT';
 
 var textFieldDecor = InputDecoration(
   labelStyle: TextStyle(color: primaryColor, fontFamily: 'Bellotta'),
@@ -47,4 +48,13 @@ void doToast(String message,
       backgroundColor: bg,
       textColor: txt,
       fontSize: 20.0);
+}
+
+makeDivider() {
+  return Divider(
+    color: Colors.blueGrey.withAlpha(50),
+    thickness: 2,
+    indent: 20,
+    endIndent: 20,
+  );
 }

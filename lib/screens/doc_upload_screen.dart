@@ -30,6 +30,29 @@ class DocUploadScreen extends StatefulWidget {
 
 class _DocUploadScreenState extends State<DocUploadScreen> {
   @override
+  void initState() {
+    initJos();
+    super.initState();
+  }
+
+  initJos() async {
+    List<String> temptitles = await SharedPrefUtils.readPrefStrList('titles');
+    List<String> tempfilepath = await SharedPrefUtils.readPrefStrList('files');
+    List<File> tempfiles = [];
+    int length = temptitles.length;
+    for (int i = 0; i < length; i++) tempfiles[i] = File(tempfilepath[i]);
+
+    if (temptitles != ['Default']) {
+      setState(() {
+        isFileThere = true;
+        fileAdded = length;
+        titleList = temptitles;
+        documents = tempfiles;
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: primaryColor,
@@ -226,7 +249,8 @@ class _DocUploadScreenState extends State<DocUploadScreen> {
       SharedPrefUtils.saveStrList('titles', titleList);
       SharedPrefUtils.saveStrList('files', tempDoc);
     }
-    Navigator.pushNamed(context, LandingScreen.id);
+    Navigator.pushNamedAndRemoveUntil(
+        context, LandingScreen.id, (Route<dynamic> route) => false);
   }
 }
 

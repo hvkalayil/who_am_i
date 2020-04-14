@@ -1,9 +1,11 @@
+import 'dart:core';
 import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:whoami/screens/social_media_screen.dart';
 import 'package:whoami/screens/social_media_setup_screen.dart';
 import 'package:whoami/service/custom_button.dart';
 import 'package:whoami/service/my_flutter_app_icons.dart';
@@ -20,6 +22,7 @@ class RegistrationScreen extends StatefulWidget {
 
 class _RegistrationScreenState extends State<RegistrationScreen> {
   File _image;
+  bool isNameGiven = false, isJobGiven = false;
   String path, userName, jobTitle;
 
   @override
@@ -103,6 +106,9 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                             Radius.circular(40),
                           ),
                           child: TextField(
+                              controller: isNameGiven
+                                  ? TextEditingController(text: userName)
+                                  : TextEditingController(),
                               onChanged: (value) {
                                 userName = value;
                               },
@@ -126,6 +132,9 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                             Radius.circular(40),
                           ),
                           child: TextField(
+                              controller: isJobGiven
+                                  ? TextEditingController(text: jobTitle)
+                                  : TextEditingController(),
                               onChanged: (value) {
                                 jobTitle = value;
                               },
@@ -175,6 +184,25 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   void initjobs() async {
     Directory dir = await getApplicationDocumentsDirectory();
     path = dir.path;
+    String temp = await SharedPrefUtils.readPrefStr('isLogRegDone');
+    if (temp == 'yes') {
+      String tempImage = await SharedPrefUtils.readPrefStr('profileImage');
+      String tempName = await SharedPrefUtils.readPrefStr('userName');
+      String tempJob = await SharedPrefUtils.readPrefStr('jobTitle');
+      setState(() {
+        isNameGiven = true;
+        userName = tempName;
+
+        if (tempImage != def) _image = File(tempImage);
+
+        if (tempJob != def) {
+          isJobGiven = true;
+          jobTitle = tempJob;
+        } else {
+          isJobGiven = false;
+        }
+      });
+    }
   }
 
   Icon getDefaultIcon() {
@@ -214,6 +242,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     if (userName == null || userName == '') {
       doToast('Please enter your name');
       return null;
+    } else {
+      SharedPrefUtils.saveStr('userName', userName);
     }
 
     if (_image == null) {
@@ -228,8 +258,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       SharedPrefUtils.saveStr('jobTitle', jobTitle);
     }
 
-    SharedPrefUtils.saveStr('userName', userName);
     doVibrate();
-    Navigator.pushNamed(this.context, SocialMediaSetupScreen.id);
+    Navigator.pushNamed(this.context, SocialMediaScreen.id);
   }
 }

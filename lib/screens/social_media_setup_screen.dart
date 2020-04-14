@@ -32,6 +32,60 @@ class _SocialMediaSetupScreenState extends State<SocialMediaSetupScreen> {
       mailName = '';
 
   @override
+  void initState() {
+    initJobs();
+    super.initState();
+  }
+
+  initJobs() async {
+    Map social = Map<int, Map>();
+
+    String tempfb = await SharedPrefUtils.readPrefStr('fbName');
+    String tempig = await SharedPrefUtils.readPrefStr('igName');
+    String temptwitter = await SharedPrefUtils.readPrefStr('twitterName');
+    String templin = await SharedPrefUtils.readPrefStr('linkedinName');
+    String temptiktok = await SharedPrefUtils.readPrefStr('tiktokName');
+    String tempmail = await SharedPrefUtils.readPrefStr('mailName');
+
+    if (tempfb == def &&
+        tempig == def &&
+        temptwitter == def &&
+        templin == def &&
+        temptiktok == def &&
+        tempmail == def) {
+      isSocialMediaAddedd = false;
+    } else {
+      setState(() {
+        isSocialMediaAddedd = true;
+        if (tempfb != def) {
+          facebookState = false;
+          fbName = tempfb;
+        }
+        if (tempig != def) {
+          instagramState = false;
+          igName = tempig;
+        }
+        if (temptwitter != def) {
+          twitterState = false;
+          twitterName = temptwitter;
+        }
+        if (templin != def) {
+          linkedinState = false;
+          linkedinName = templin;
+        }
+        if (temptiktok != def) {
+          tiktokState = false;
+          tiktokName = temptiktok;
+        }
+        if (tempmail != def) {
+          mailState = false;
+          mailName = tempmail;
+        }
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: primaryColor,
@@ -140,6 +194,44 @@ class _SocialMediaSetupScreenState extends State<SocialMediaSetupScreen> {
 
   makeTile(BuildContext context, IconData icon, String text, String hint,
       int index) {
+    TextEditingController controller;
+    if (text == 'Facebook') {
+      if (facebookState == false)
+        controller = TextEditingController(text: fbName);
+      else
+        controller = TextEditingController();
+    }
+    if (text == 'Instagram') {
+      if (instagramState == false)
+        controller = TextEditingController(text: igName);
+      else
+        controller = TextEditingController();
+    }
+    if (text == 'Twitter') {
+      if (twitterState == false)
+        controller = TextEditingController(text: twitterName);
+      else
+        controller = TextEditingController();
+    }
+    if (text == 'LinkedIn') {
+      if (linkedinState == false)
+        controller = TextEditingController(text: linkedinName);
+      else
+        controller = TextEditingController();
+    }
+    if (text == 'Tiktok') {
+      if (tiktokState == false)
+        controller = TextEditingController(text: tiktokName);
+      else
+        controller = TextEditingController();
+    }
+    if (text == 'Gmail') {
+      if (mailState == false)
+        controller = TextEditingController(text: mailName);
+      else
+        controller = TextEditingController();
+    }
+
     return ListTile(
       contentPadding: EdgeInsets.only(bottom: 15, left: 20, right: 10, top: 10),
       leading: Icon(
@@ -154,6 +246,7 @@ class _SocialMediaSetupScreenState extends State<SocialMediaSetupScreen> {
           Radius.circular(40),
         ),
         child: TextField(
+            controller: controller,
             onChanged: (value) {
               switch (index) {
                 case 1:
@@ -371,15 +464,6 @@ class _SocialMediaSetupScreenState extends State<SocialMediaSetupScreen> {
     }
 
     return socialMediaTextSet;
-  }
-
-  makeDivider() {
-    return Divider(
-      color: Colors.blueGrey.withAlpha(50),
-      thickness: 2,
-      indent: 20,
-      endIndent: 20,
-    );
   }
 
   void onNextClick() {
