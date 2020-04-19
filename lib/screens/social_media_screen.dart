@@ -1,9 +1,6 @@
-import 'dart:convert';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:open_file/open_file.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:whoami/screens/doc_upload_screen.dart';
 import 'package:whoami/service/custom_button.dart';
@@ -13,6 +10,11 @@ import 'package:whoami/service/shared_prefs_util.dart';
 import '../constants.dart';
 
 int socialAdded = 0;
+List<int> socialAddedList = [];
+List<String> profileList = [];
+List<String> linkList = [];
+List<String> formatList = [];
+List<String> labelList = [];
 Map<int, Map> social = Map<int, Map>();
 
 class SocialMediaScreen extends StatefulWidget {
@@ -24,102 +26,11 @@ class SocialMediaScreen extends StatefulWidget {
 class _SocialMediaScreenState extends State<SocialMediaScreen> {
   bool isSocialExist = false;
   int fileAdded;
+
   @override
   void initState() {
-    initJobs();
+    makeMap();
     super.initState();
-  }
-
-  initJobs() async {
-    String s = await SharedPrefUtils.readPrefStr('social');
-    if (s != null) {
-      social = jsonDecode(s);
-      if (social.isNotEmpty) {
-        int n = social.length;
-        setState(() {
-          socialAdded = social[n].keys as int;
-        });
-        print(socialAdded);
-      }
-    }
-    if (socialAdded > 0) {
-      setState(() {
-        isSocialExist = true;
-      });
-    }
-  }
-
-  makeSocialList() {
-    List<ListTile> socialMedias = [];
-    int length = social.length;
-    for (int i = 0; i < length; i++) {
-      if (social.containsKey(i))
-        socialMedias.add(makeTile(social[i], i));
-      else
-        length++;
-    }
-    return socialMedias;
-  }
-
-  makeTile(Map m, int index) {
-    Icon icon = m['icon']['icon'];
-    String user = m['profile']['profile'];
-    String url = m['link']['link'];
-    String format = m['format']['format'];
-    String label = m['label']['label'];
-    if (format != noFormat) user = user.replaceAll(' ', format);
-
-    String userLink = url + user;
-
-    return ListTile(
-      leading: icon,
-      title: FlatButton(
-        padding: EdgeInsets.all(10),
-        color: primaryColor,
-        onPressed: () async {
-          if (icon ==
-              Icon(
-                Icons.mail_outline,
-                color: primaryColor,
-              )) {
-            if (await canLaunch("mailto:$userLink")) {
-              await launch("mailto:$userLink");
-            }
-          }
-          if (await canLaunch(userLink)) {
-            bool nativeLaunch = await launch(
-              userLink,
-              forceSafariVC: false,
-              forceWebView: false,
-              universalLinksOnly: true,
-            );
-            if (!nativeLaunch) {
-              await launch(userLink, forceWebView: true, forceSafariVC: true);
-            }
-          } else {
-            throw 'Could not launch $userLink';
-          }
-        },
-        child: Text(
-          label,
-          style: TextStyle(
-              color: secondaryColor, fontFamily: 'Bellotta', fontSize: 24),
-        ),
-      ),
-      trailing: GestureDetector(
-        onTap: () {
-          setState(() {
-            social.remove(index);
-            socialAdded--;
-            if (socialAdded == 0) isSocialExist = false;
-          });
-        },
-        child: Icon(
-          Icons.cancel,
-          color: Colors.red,
-        ),
-      ),
-    );
   }
 
   @override
@@ -161,6 +72,10 @@ class _SocialMediaScreenState extends State<SocialMediaScreen> {
                   ),
                 ),
               ),
+
+              //****************************************************************
+              //BODY
+
               Flexible(
                 flex: 5,
                 fit: FlexFit.loose,
@@ -191,6 +106,10 @@ class _SocialMediaScreenState extends State<SocialMediaScreen> {
               SizedBox(
                 height: 20,
               ),
+
+              //****************************************************************
+              //PREVIOUS AND NEXT BUTTONS
+
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
@@ -229,10 +148,16 @@ class _SocialMediaScreenState extends State<SocialMediaScreen> {
   }
 
   onNextClick() {
-    String s = jsonEncode(social);
-    SharedPrefUtils.saveStr('social', s);
+    List<String> socialAddedStrList =
+        socialAddedList.map((i) => i.toString()).toList();
+    SharedPrefUtils.saveStrList('socialAddedList', socialAddedStrList);
+    SharedPrefUtils.saveStrList('profileList', profileList);
+    SharedPrefUtils.saveStrList('linkList', linkList);
+    SharedPrefUtils.saveStrList('formatList', formatList);
+    SharedPrefUtils.saveStrList('labelList', labelList);
     doVibrate();
-    Navigator.pushNamed(context, DocUploadScreen.id);
+    Navigator.push(context,
+        SlideRightRoute(widget: DocUploadScreen(), begin: Offset(1, 0)));
   }
 
   Container makeButton(BuildContext context) {
@@ -269,7 +194,134 @@ class _SocialMediaScreenState extends State<SocialMediaScreen> {
         builder: (_) {
           return CreateAlertDialog();
         });
-    Navigator.popAndPushNamed(context, SocialMediaScreen.id);
+    if (socialAddedList.isNotEmpty) {
+      await makeMap();
+      Navigator.popAndPushNamed(context, SocialMediaScreen.id);
+    }
+  }
+
+  makeMap() async {
+    List<String> socialAddedStrList =
+        await SharedPrefUtils.readPrefStrList('socialAddedList');
+    if (socialAddedStrList != null) {
+      if (socialAddedStrList.length > -1) {
+        List<int> socialAddedIntList =
+            socialAddedStrList.map((i) => int.parse(i)).toList();
+        int lastSocialAdded = socialAddedIntList.last;
+        int length = socialAddedIntList.length;
+        List<String> profileListTemp =
+            await SharedPrefUtils.readPrefStrList('profileList');
+        List<String> linkListTemp =
+            await SharedPrefUtils.readPrefStrList('linkList');
+        List<String> formatListTemp =
+            await SharedPrefUtils.readPrefStrList('formatList');
+        List<String> labelListTemp =
+            await SharedPrefUtils.readPrefStrList('labelList');
+
+        Map<int, Map> tempSocial = Map<int, Map>();
+        for (int i = 0; i < length; i++) {
+          tempSocial.addAll({
+            socialAddedIntList[i]: {
+              'profile': {'profile': profileListTemp[i]},
+              'link': {'link': linkListTemp[i]},
+              'format': {'format': formatListTemp[i]},
+              'label': {'label': labelListTemp[i]},
+            }
+          });
+        }
+        setState(() {
+          isSocialExist = true;
+          social = tempSocial;
+          socialAdded = lastSocialAdded + 1;
+          socialAddedList = socialAddedIntList;
+          profileList = profileListTemp;
+          linkList = linkListTemp;
+          formatList = formatListTemp;
+          labelList = labelListTemp;
+        });
+      }
+    }
+  }
+
+  makeSocialList() {
+    List<ListTile> socialMedias = [];
+    int length = social.length;
+    for (int i = 0; i < length; i++) {
+      if (social.containsKey(i))
+        socialMedias.add(makeTile(social[i], i));
+      else
+        length++;
+    }
+    return socialMedias;
+  }
+
+  makeTile(Map m, int index) {
+    String user = m['profile']['profile'];
+    String url = m['link']['link'];
+    String format = m['format']['format'];
+    String label = m['label']['label'];
+    if (format != noFormat) user = user.replaceAll(' ', format);
+
+    String userLink = url + user;
+
+    return ListTile(
+      title: FlatButton(
+        padding: EdgeInsets.all(10),
+        color: primaryColor,
+        onPressed: () async {
+          if (url == 'https://www.gmail.com') {
+            if (await canLaunch("mailto:$userLink")) {
+              await launch("mailto:$userLink");
+            }
+          }
+          if (await canLaunch(userLink)) {
+            bool nativeLaunch = await launch(
+              userLink,
+              forceSafariVC: false,
+              forceWebView: false,
+              universalLinksOnly: true,
+            );
+            if (!nativeLaunch) {
+              await launch(userLink, forceWebView: true, forceSafariVC: true);
+            }
+          } else {
+            throw 'Could not launch $userLink';
+          }
+        },
+        child: Text(
+          label,
+          style: TextStyle(
+              color: secondaryColor, fontFamily: 'Bellotta', fontSize: 24),
+        ),
+      ),
+      trailing: GestureDetector(
+        onTap: () async {
+          int listIndex = socialAddedList.indexOf(index);
+          setState(() {
+            social.remove(index);
+            socialAddedList.removeAt(listIndex);
+            profileList.removeAt(listIndex);
+            linkList.removeAt(listIndex);
+            formatList.removeAt(listIndex);
+            labelList.removeAt(listIndex);
+            if (social.isEmpty) isSocialExist = false;
+          });
+          List<String> socialAddedStrList =
+              socialAddedList.map((i) => i.toString()).toList();
+          await SharedPrefUtils.saveStrList(
+              'socialAddedList', socialAddedStrList);
+          await SharedPrefUtils.saveStrList('profileList', profileList);
+          await SharedPrefUtils.saveStrList('linkList', linkList);
+          await SharedPrefUtils.saveStrList('formatList', formatList);
+          await SharedPrefUtils.saveStrList('labelList', labelList);
+          await makeMap();
+        },
+        child: Icon(
+          Icons.cancel,
+          color: Colors.red,
+        ),
+      ),
+    );
   }
 }
 
@@ -405,24 +457,29 @@ class _CreateAlertDialogState extends State<CreateAlertDialog> {
           ),
         ),
         FlatButton(
-          onPressed: () {
+          onPressed: () async {
             if (profile == '' || profile == null) {
               doToast('Please enter user name');
               return;
             } else {
-              Map<int, Map> tempSocial = {
-                socialAdded: {
-                  'icon': {'icon': selectedIcon},
-                  'profile': {'profile': profile},
-                  'link': {'link': url},
-                  'format': {'format': form},
-                  'label': {'label': label},
-                },
-              };
               setState(() {
-                social.addAll(tempSocial);
+                socialAddedList.add(socialAdded);
+                profileList.add(profile);
+                linkList.add(url);
+                formatList.add(form);
+                labelList.add(label);
                 socialAdded++;
               });
+
+              List<String> socialAddedStrList =
+                  socialAddedList.map((i) => i.toString()).toList();
+
+              await SharedPrefUtils.saveStrList(
+                  'socialAddedList', socialAddedStrList);
+              await SharedPrefUtils.saveStrList('profileList', profileList);
+              await SharedPrefUtils.saveStrList('linkList', linkList);
+              await SharedPrefUtils.saveStrList('formatList', formatList);
+              await SharedPrefUtils.saveStrList('labelList', labelList);
               Navigator.of(context, rootNavigator: true).pop();
             }
           },

@@ -32,6 +32,7 @@ dependencies:
   flutter_iconpicker: ^1.1.1
   open_file: ^3.0.1
   url_launcher: ^5.4.2
+  loading_indicator: ^1.1.0
 
 
 dev_dependencies:

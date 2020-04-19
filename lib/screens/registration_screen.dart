@@ -1,17 +1,17 @@
 import 'dart:core';
 import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:whoami/screens/social_media_screen.dart';
-import 'package:whoami/screens/social_media_setup_screen.dart';
-import 'package:whoami/service/custom_button.dart';
-import 'package:whoami/service/my_flutter_app_icons.dart';
-import 'package:whoami/constants.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:whoami/constants.dart';
+import 'package:whoami/screens/social_media_screen.dart';
+import 'package:whoami/service/custom_button.dart';
+import 'package:whoami/service/my_flutter_app_icons.dart';
 import 'package:whoami/service/shared_prefs_util.dart';
 
 class RegistrationScreen extends StatefulWidget {
@@ -213,7 +213,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     );
   }
 
-  Container getImage() {
+  getImage() {
     return Container(
       height: 210,
       decoration: BoxDecoration(
@@ -224,7 +224,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     );
   }
 
-  void useImagePicker(bool isCamera) async {
+  useImagePicker(bool isCamera) async {
     File image;
     if (isCamera)
       image = await ImagePicker.pickImage(source: ImageSource.camera);
@@ -259,6 +259,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     }
 
     doVibrate();
-    Navigator.pushNamed(this.context, SocialMediaScreen.id);
+    Navigator.push(this.context,
+        SlideRightRoute(widget: SocialMediaScreen(), begin: Offset(1, 0)));
   }
 }

@@ -38,8 +38,6 @@ class _SocialMediaSetupScreenState extends State<SocialMediaSetupScreen> {
   }
 
   initJobs() async {
-    Map social = Map<int, Map>();
-
     String tempfb = await SharedPrefUtils.readPrefStr('fbName');
     String tempig = await SharedPrefUtils.readPrefStr('igName');
     String temptwitter = await SharedPrefUtils.readPrefStr('twitterName');

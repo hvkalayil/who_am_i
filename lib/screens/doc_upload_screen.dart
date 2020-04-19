@@ -35,23 +35,6 @@ class _DocUploadScreenState extends State<DocUploadScreen> {
     super.initState();
   }
 
-  initJos() async {
-    List<String> temptitles = await SharedPrefUtils.readPrefStrList('titles');
-    List<String> tempfilepath = await SharedPrefUtils.readPrefStrList('files');
-    List<File> tempfiles = [];
-    int length = temptitles.length;
-    for (int i = 0; i < length; i++) tempfiles[i] = File(tempfilepath[i]);
-
-    if (temptitles != ['Default']) {
-      setState(() {
-        isFileThere = true;
-        fileAdded = length;
-        titleList = temptitles;
-        documents = tempfiles;
-      });
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -91,6 +74,10 @@ class _DocUploadScreenState extends State<DocUploadScreen> {
                   ),
                 ),
               ),
+
+              //****************************************************************
+              //BODY
+
               Flexible(
                 flex: 5,
                 fit: FlexFit.loose,
@@ -121,6 +108,10 @@ class _DocUploadScreenState extends State<DocUploadScreen> {
               SizedBox(
                 height: 20,
               ),
+
+              //****************************************************************
+              // PREVIOUS AND FINISH BUTTONS
+
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
@@ -156,6 +147,28 @@ class _DocUploadScreenState extends State<DocUploadScreen> {
         ),
       ),
     );
+  }
+
+  initJos() async {
+    List<String> temptitles = await SharedPrefUtils.readPrefStrList('titles');
+    List<String> tempfilepath = await SharedPrefUtils.readPrefStrList('files');
+    if (temptitles != null) {
+      if (temptitles.isNotEmpty) {
+        List<File> tempfiles = [];
+        int length = tempfilepath.length;
+        for (int i = 0; i < length; i++) {
+          tempfiles.add(File(tempfilepath[i]));
+        }
+        if (temptitles != ['Default']) {
+          setState(() {
+            isFileThere = true;
+            fileAdded = length;
+            titleList = temptitles;
+            documents = tempfiles;
+          });
+        }
+      }
+    }
   }
 
   void addClick(BuildContext context) async {
@@ -198,7 +211,7 @@ class _DocUploadScreenState extends State<DocUploadScreen> {
   List<ListTile> makeDocList() {
     int n = 0;
     List<ListTile> docList = [];
-    for (int i = 0; i < fileAdded; i++) {
+    for (int i = 0; i < documents.length; i++) {
       String title = titleList[i];
       String fpath = documents[i].path;
       docList.add(makeSingleTile(text: title, filePath: fpath, index: n));
@@ -213,11 +226,12 @@ class _DocUploadScreenState extends State<DocUploadScreen> {
         onPressed: () async {
           await OpenFile.open(filePath);
         },
-        padding: EdgeInsets.all(16),
+        padding: EdgeInsets.all(10),
         color: primaryColor,
         child: Text(
           text,
-          style: TextStyle(color: secondaryColor),
+          style: TextStyle(
+              color: secondaryColor, fontFamily: 'Bellotta', fontSize: 24),
         ),
       ),
       trailing: GestureDetector(
@@ -237,17 +251,17 @@ class _DocUploadScreenState extends State<DocUploadScreen> {
     );
   }
 
-  onFinishClick(BuildContext context) {
+  onFinishClick(BuildContext context) async {
     if (fileAdded == 0) {
-      SharedPrefUtils.saveStrList('titles', ['Default']);
-      SharedPrefUtils.saveStrList('files', ['Default']);
+      await SharedPrefUtils.saveStrList('titles', ['Default']);
+      await SharedPrefUtils.saveStrList('files', ['Default']);
     } else {
       List<String> tempDoc = [];
       for (int i = 0; i < fileAdded; i++) {
         tempDoc.add(documents[i].path);
       }
-      SharedPrefUtils.saveStrList('titles', titleList);
-      SharedPrefUtils.saveStrList('files', tempDoc);
+      await SharedPrefUtils.saveStrList('titles', titleList);
+      await SharedPrefUtils.saveStrList('files', tempDoc);
     }
     Navigator.pushNamedAndRemoveUntil(
         context, LandingScreen.id, (Route<dynamic> route) => false);
@@ -289,6 +303,11 @@ class _CreateAlertDialogState extends State<CreateAlertDialog> {
         fileAdded++;
         isFileThere = true;
       });
+      List<String> tempDoc = [];
+      for (int i = 0; i < documents.length; i++) {
+        tempDoc.add(documents[i].path);
+      }
+      SharedPrefUtils.saveStrList('files', tempDoc);
       Navigator.of(context, rootNavigator: true).pop();
     }
   }
@@ -364,7 +383,7 @@ class _CreateAlertDialogState extends State<CreateAlertDialog> {
           ),
         ),
         FlatButton(
-          onPressed: () {
+          onPressed: () async {
             if (docTitle == '' || docTitle == null) {
               doToast('Please enter a title for your document');
               return;
@@ -372,6 +391,7 @@ class _CreateAlertDialogState extends State<CreateAlertDialog> {
               setState(() {
                 titleList.add(docTitle);
               });
+              await SharedPrefUtils.saveStrList('titles', titleList);
               addDocs(this.context);
             }
           },
