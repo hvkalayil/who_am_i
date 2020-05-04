@@ -32,7 +32,10 @@ class LoginRegisterScreen extends StatelessWidget {
                     highlightColor: primaryColor.withAlpha(50),
                     onPressed: () {
                       doVibrate();
-                      Navigator.pushNamed(context, LoginScreen.id);
+                      Navigator.push(
+                          context,
+                          SlideRoute(
+                              widget: LoginScreen(), begin: Offset(0, -1)));
                     },
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -40,10 +43,10 @@ class LoginRegisterScreen extends StatelessWidget {
                         Text(
                           'Use an existing profile',
                           textAlign: TextAlign.center,
-                          style: TextStyle(
-                              fontSize: 40,
-                              color: primaryColor,
-                              fontFamily: 'Bellotta'),
+                          style: font.copyWith(
+                            fontSize: 40,
+                            color: primaryColor,
+                          ),
                         ),
                         SizedBox(
                           height: 50,
@@ -65,8 +68,8 @@ class LoginRegisterScreen extends StatelessWidget {
                     color: primaryColor,
                     onPressed: () async {
                       doVibrate();
-                      Navigator.push(context,
-                          SlideRightRoute(widget: RegistrationScreen()));
+                      Navigator.push(
+                          context, SlideRoute(widget: RegistrationScreen()));
                     },
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -82,10 +85,10 @@ class LoginRegisterScreen extends StatelessWidget {
                         Text(
                           'Set up a new\n profile',
                           textAlign: TextAlign.center,
-                          style: TextStyle(
-                              fontSize: 40,
-                              color: secondaryColor,
-                              fontFamily: 'Bellotta'),
+                          style: font.copyWith(
+                            fontSize: 40,
+                            color: secondaryColor,
+                          ),
                         ),
                       ],
                     ),

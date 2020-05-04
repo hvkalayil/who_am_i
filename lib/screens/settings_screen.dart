@@ -1,6 +1,11 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:whoami/screens/login_register_screen.dart';
 import 'package:whoami/screens/registration_screen.dart';
+import 'package:whoami/screens/sign_up_screen.dart';
+import 'package:whoami/service/shared_prefs_util.dart';
 
 import '../constants.dart';
 
@@ -11,6 +16,24 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    initJobs();
+  }
+
+  bool isSignUpDone = false;
+  bool confirm;
+  initJobs() async {
+    String x = await SharedPrefUtils.readPrefStr('isSignUpDone');
+    if (x == 'yes') {
+      setState(() {
+        isSignUpDone = true;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -25,10 +48,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               color: secondaryColor,
               size: 40,
             )),
-        title: Text(
-          'Settings',
-          style: TextStyle(fontFamily: 'Bellotta', fontSize: 28),
-        ),
+        title: Text('Settings', style: font.copyWith(fontSize: 28)),
         backgroundColor: primaryColor,
       ),
       body: AnnotatedRegion<SystemUiOverlayStyle>(
@@ -40,39 +60,110 @@ class _SettingsScreenState extends State<SettingsScreen> {
               makeOptions(
                   context: context, ico: Icons.edit, txt: 'Edit Details'),
               makeDivider(),
-              makeOptions(ico: Icons.cloud_upload, txt: 'Upload to cloud'),
+              makeOptions(
+                  context: context,
+                  ico: Icons.cloud_upload,
+                  txt: 'Upload to cloud'),
               makeDivider(),
-              makeOptions(ico: Icons.smoke_free, txt: 'Get Ad free version'),
+//              makeOptions(
+//                  context: context,
+//                  ico: Icons.smoke_free,
+//                  txt: 'Get Ad free version'),
+//              makeDivider(),
+              makeOptions(
+                  context: context, ico: Icons.bug_report, txt: 'Report bug'),
               makeDivider(),
-              makeOptions(ico: Icons.bug_report, txt: 'Report bug'),
+              makeOptions(
+                  context: context, ico: Icons.contact_mail, txt: 'Contact me'),
               makeDivider(),
-              makeOptions(ico: Icons.contact_mail, txt: 'Contact me'),
-              makeDivider(),
+              isSignUpDone
+                  ? makeOptions(
+                      context: context, ico: Icons.contact_mail, txt: 'Log Out')
+                  : SizedBox(
+                      width: 0,
+                    ),
+              isSignUpDone
+                  ? makeDivider()
+                  : SizedBox(
+                      width: 0,
+                    )
             ],
           ),
         ),
       ),
     );
   }
-}
 
-makeOptions({BuildContext context, IconData ico, String txt}) {
-  return FlatButton(
-    onPressed: () {
-      if (txt == 'Edit Details')
-        Navigator.popAndPushNamed(context, RegistrationScreen.id);
-    },
-    child: ListTile(
-      leading: Icon(
-        ico,
-        color: primaryColor,
-        size: 30,
+  makeOptions({BuildContext context, IconData ico, String txt}) {
+    return FlatButton(
+      onPressed: () async {
+        if (txt == 'Edit Details')
+          Navigator.popAndPushNamed(context, RegistrationScreen.id);
+        else if (txt == 'Upload to cloud')
+          Navigator.popAndPushNamed(context, SignUpScreen.id);
+//      else if (txt == 'Get Ad free version'){
+//        var url = 'url to app';
+//        if (await canLaunch(url)) {
+//          await launch(url);
+//        } else {
+//          throw 'Could not launch $url';
+//        }
+//      }
+        else if (txt == 'Report bug') {
+          var url =
+              'mailto:hoseakalayil@gmail.com?subject=Who Am I - User Bug Report &body=Hey,\nBug Found:\nSteps to reproduce bug:';
+          if (await canLaunch(url)) {
+            await launch(url);
+          } else {
+            throw 'Could not launch $url';
+          }
+        } else if (txt == 'Contact me') {
+          var url =
+              'mailto:hoseakalayil@gmail.com?subject=Who Am I - User Message &body=Hey,\nHow\'s it going?';
+          if (await canLaunch(url)) {
+            await launch(url);
+          } else {
+            throw 'Could not launch $url';
+          }
+        } else if (txt == 'Log Out') {
+          showDialog(
+              context: context,
+              builder: (_) => AlertDialog(
+                    title: Text('Confirm Log Out'),
+                    content: Text('Are you sure you want to Log Out'),
+                    actions: <Widget>[
+                      FlatButton(
+                        child: Text('No'),
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                      ),
+                      FlatButton(
+                        child: Text('Yes'),
+                        onPressed: () async {
+                          await FirebaseAuth.instance.signOut();
+                          await SharedPrefUtils.clearAll();
+                          Navigator.pushNamedAndRemoveUntil(
+                              context,
+                              LoginRegisterScreen.id,
+                              (Route<dynamic> route) => false);
+                        },
+                      ),
+                    ],
+                  ));
+        }
+      },
+      child: ListTile(
+        leading: Icon(
+          ico,
+          color: primaryColor,
+          size: 30,
+        ),
+        title: Text(
+          txt,
+          style: font.copyWith(color: primaryColor, fontSize: 30),
+        ),
       ),
-      title: Text(
-        txt,
-        style: TextStyle(
-            fontFamily: 'Bellotta', color: primaryColor, fontSize: 30),
-      ),
-    ),
-  );
+    );
+  }
 }

@@ -33,8 +33,7 @@ class CustomButton extends StatelessWidget {
         child: Text(
           buttonText,
           textAlign: TextAlign.center,
-          style:
-              TextStyle(color: textColor, fontFamily: 'Bellotta', fontSize: 20),
+          style: font.copyWith(color: textColor, fontSize: 20),
         ),
       ),
     );

@@ -20,6 +20,10 @@
 ///         Author:    Stephen Hutchings
 ///         License:   SIL (http://scripts.sil.org/OFL)
 ///         Homepage:  http://typicons.com/
+/// * Font Awesome, Copyright (C) 2016 by Dave Gandy
+///         Author:    Dave Gandy
+///         License:   SIL ()
+///         Homepage:  http://fortawesome.github.com/Font-Awesome/
 /// * Brandico, (C) 2012 by Vitaly Puzrin
 ///         Author:    Crowdsourced, for Fontello project
 ///         License:   SIL (http://scripts.sil.org/OFL)
@@ -33,15 +37,18 @@ class MyFlutterApp {
   static const _kFontFam = 'MyFlutterApp';
   static const _kFontPkg = null;
 
-  static const IconData icon = const IconData(0xe800, fontFamily: _kFontFam, fontPackage: _kFontPkg);
-  static const IconData icon2 = const IconData(0xe801, fontFamily: _kFontFam, fontPackage: _kFontPkg);
-  static const IconData facebook = const IconData(0xe802, fontFamily: _kFontFam, fontPackage: _kFontPkg);
-  static const IconData linkedin = const IconData(0xe803, fontFamily: _kFontFam, fontPackage: _kFontPkg);
-  static const IconData twitter = const IconData(0xe804, fontFamily: _kFontFam, fontPackage: _kFontPkg);
-  static const IconData tiktok = const IconData(0xe805, fontFamily: _kFontFam, fontPackage: _kFontPkg);
-  static const IconData driving = const IconData(0xe806, fontFamily: _kFontFam, fontPackage: _kFontPkg);
-  static const IconData id = const IconData(0xe807, fontFamily: _kFontFam, fontPackage: _kFontPkg);
-  static const IconData pan = const IconData(0xe808, fontFamily: _kFontFam, fontPackage: _kFontPkg);
-  static const IconData uid = const IconData(0xe809, fontFamily: _kFontFam, fontPackage: _kFontPkg);
-  static const IconData instagram = const IconData(0xf31e, fontFamily: _kFontFam, fontPackage: _kFontPkg);
+  static const IconData icon = IconData(0xe800, fontFamily: _kFontFam, fontPackage: _kFontPkg);
+  static const IconData icon2 = IconData(0xe801, fontFamily: _kFontFam, fontPackage: _kFontPkg);
+  static const IconData facebook = IconData(0xe802, fontFamily: _kFontFam, fontPackage: _kFontPkg);
+  static const IconData linkedin = IconData(0xe803, fontFamily: _kFontFam, fontPackage: _kFontPkg);
+  static const IconData twitter = IconData(0xe804, fontFamily: _kFontFam, fontPackage: _kFontPkg);
+  static const IconData tiktok = IconData(0xe805, fontFamily: _kFontFam, fontPackage: _kFontPkg);
+  static const IconData driving = IconData(0xe806, fontFamily: _kFontFam, fontPackage: _kFontPkg);
+  static const IconData id = IconData(0xe807, fontFamily: _kFontFam, fontPackage: _kFontPkg);
+  static const IconData uid = IconData(0xe808, fontFamily: _kFontFam, fontPackage: _kFontPkg);
+  static const IconData pan = IconData(0xe809, fontFamily: _kFontFam, fontPackage: _kFontPkg);
+  static const IconData under_work = IconData(0xe80a, fontFamily: _kFontFam, fontPackage: _kFontPkg);
+  static const IconData dribbble = IconData(0xf17d, fontFamily: _kFontFam, fontPackage: _kFontPkg);
+  static const IconData pinterest = IconData(0xf231, fontFamily: _kFontFam, fontPackage: _kFontPkg);
+  static const IconData instagram = IconData(0xf31e, fontFamily: _kFontFam, fontPackage: _kFontPkg);
 }

@@ -18,6 +18,7 @@ class InitialScreen extends StatefulWidget {
 
 class _InitialScreenState extends State<InitialScreen> {
   bool isDone;
+  double moveImg = 500;
 
   initJobs() async {
     String temp = await SharedPrefUtils.readPrefStr('isLogRegDone');
@@ -31,7 +32,12 @@ class _InitialScreenState extends State<InitialScreen> {
   void initState() {
     super.initState();
     initJobs();
-    Timer(Duration(seconds: 3), () {
+    Timer(Duration(milliseconds: 500), () {
+      setState(() {
+        moveImg = 0;
+      });
+    });
+    Timer(Duration(seconds: 2), () {
       if (isDone)
         Navigator.popAndPushNamed(context, LandingScreen.id);
       else
@@ -49,7 +55,9 @@ class _InitialScreenState extends State<InitialScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              Container(
+              AnimatedContainer(
+                duration: Duration(milliseconds: 500),
+                transform: Matrix4.translationValues(moveImg, 0, 0),
                 decoration: BoxDecoration(
                   image: DecorationImage(
                       image: AssetImage('assets/logo.png'),

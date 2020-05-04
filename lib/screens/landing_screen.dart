@@ -1,16 +1,19 @@
 import 'dart:io';
-
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:open_file/open_file.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:whoami/screens/settings_screen.dart';
 import 'package:whoami/service/my_flutter_app_icons.dart';
 import 'package:whoami/service/shared_prefs_util.dart';
-
 import '../constants.dart';
+import 'package:http/http.dart' as http;
 
 class LandingScreen extends StatefulWidget {
   static String id = 'LandingScreen';
@@ -19,23 +22,291 @@ class LandingScreen extends StatefulWidget {
 }
 
 class _LandingScreenState extends State<LandingScreen> {
-  int index = 0;
-  String profileImage, userName = '', jobTitle;
-  Map<int, Map> social = Map<int, Map>();
-  int socialAdded = 0;
-  List<int> socialAddedList = [];
-  List<String> profileList = [];
-  List<String> linkList = [];
-  List<String> formatList = [];
-  List<String> labelList = [];
+  String profileImage = '', userName = '', jobTitle = '';
+  List<String> socialMediaUrl = [];
   List<String> files, titles;
   bool isImageExist = false,
       isJobExist = false,
       isSocialExist = false,
       isFileExist = false;
-  int n = 0;
+  final Firestore _database = Firestore.instance;
+  http.Client httpClient = http.Client();
+  bool fetching = true;
+  QuerySnapshot messages;
+  StorageFileDownloadTask _task;
+  final FirebaseStorage _storage =
+      FirebaseStorage(storageBucket: 'gs://who-am-i-d8752.appspot.com');
+  bool useCloud;
 
-  void initJobs() async {
+  @override
+  void initState() {
+    initJobs();
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return WillPopScope(
+      onWillPop: () async {
+        bool x =
+            await SystemChannels.platform.invokeMethod('SystemNavigator.pop');
+        return x;
+      },
+      child: Scaffold(
+        backgroundColor: primaryColor,
+        body: AnnotatedRegion<SystemUiOverlayStyle>(
+          value: SystemUiOverlayStyle(statusBarColor: primaryColor),
+          child: SafeArea(
+            child: ModalProgressHUD(
+              inAsyncCall: fetching,
+              child: ListView(
+                children: <Widget>[
+                  Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        SizedBox(
+                          height: 50,
+                        ),
+                        CircleAvatar(
+                            radius: 100,
+                            backgroundColor: secondaryColor,
+                            child: isImageExist
+                                ? getProfileIcon()
+                                : getDefaultIcon()),
+                        SizedBox(
+                          height: 10,
+                        ),
+                        Text(userName,
+                            style: font.copyWith(
+                                color: secondaryColor, fontSize: 30)),
+                        Container(
+                          child: isJobExist
+                              ? getJob()
+                              : Container(color: secondaryColor),
+                        ),
+                        SizedBox(
+                          height: 20,
+                        ),
+                        Container(
+                          child: isSocialExist
+                              ? Container(
+                                  padding: EdgeInsets.all(20),
+                                  decoration: BoxDecoration(
+                                      border: Border.all(
+                                          color: secondaryColor, width: 5),
+                                      borderRadius: BorderRadius.all(
+                                          Radius.circular(20))),
+                                  child: Wrap(
+                                    alignment: WrapAlignment.center,
+                                    children: makeSocialList(),
+                                  ),
+                                )
+                              : SizedBox(height: 0),
+                        ),
+                        SizedBox(
+                          height: 20,
+                        ),
+                        Container(
+                          child: isFileExist
+                              ? Container(
+                                  padding: EdgeInsets.all(20),
+                                  decoration: BoxDecoration(
+                                      border: Border.all(
+                                          color: secondaryColor, width: 5),
+                                      borderRadius: BorderRadius.all(
+                                          Radius.circular(20))),
+                                  child: Wrap(
+                                    alignment: WrapAlignment.center,
+                                    children: makeFiles(),
+                                  ))
+                              : SizedBox(height: 0),
+                        ),
+                        FlatButton(
+                          padding: EdgeInsets.all(20),
+                          child: Icon(
+                            Icons.settings,
+                            color: secondaryColor,
+                            size: 40,
+                          ),
+                          onPressed: () {
+                            Navigator.pushNamed(context, SettingsScreen.id);
+                          },
+                        )
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  initJobs() async {
+    String isDone = await SharedPrefUtils.readPrefStr('isSignUpDone');
+    String isCloud = await SharedPrefUtils.readPrefStr('isFirstTimeCloud');
+
+    if (isDone == 'yes' && isCloud == 'yes') {
+      print('something');
+      setState(() {
+        useCloud = true;
+      });
+      await dataFromCloud();
+    } else {
+      print('something');
+      setState(() {
+        useCloud = false;
+      });
+      await dataFromSharedPrefs();
+    }
+
+    await SharedPrefUtils.saveStr('isLogRegDone', 'yes');
+  }
+
+  dataFromCloud() async {
+    String uid = await SharedPrefUtils.readPrefStr('uid');
+    Map details;
+    var x = await _database.collection('user details').getDocuments();
+    for (var a in x.documents) {
+      if (a.documentID == uid) {
+        details = a.data;
+        break;
+      }
+    }
+
+    String tempName = details['name'];
+    String tempJob = details['job'];
+    List ts = details['social'];
+    List<String> tempSocial = [];
+    if (ts != null) {
+      for (int i = 0; i < ts.length; i++) tempSocial.add(ts[i]);
+    }
+
+    List tt = details['titles'];
+    List<String> tempTitles = [];
+    if (tt != null) {
+      for (int i = 0; i < tt.length; i++) tempTitles.add(tt[i]);
+    }
+
+    List tl = details['links'];
+    List<String> tempLinks = [];
+    if (tl != null) {
+      for (int i = 0; i < tl.length; i++) tempLinks.add(tl[i]);
+      print(tempLinks);
+    }
+
+    List tf = details['filenames'];
+    List<String> tempFilenames = [];
+    if (tf != null) {
+      for (int i = 0; i < tf.length; i++) tempFilenames.add(tf[i]);
+      print(tempFilenames);
+    }
+
+    List<File> tempRealFiles = [];
+    List<String> tempFiles = [];
+    String tempProfile = '';
+    if (tl != null) {
+      for (int i = 0; i < tempLinks.length; i++) {
+        var request = await httpClient.get(Uri.parse(tempLinks[i]));
+        var bytes = request.bodyBytes;
+        String dir = (await getApplicationDocumentsDirectory()).path;
+        File file = File('$dir/${tempFilenames[i]}');
+        await file.writeAsBytes(bytes);
+        tempRealFiles.add(file);
+      }
+      print(tempRealFiles);
+
+      if (tempRealFiles.length != tempTitles.length) {
+        tempProfile = tempRealFiles[0].path;
+        for (int i = 1; i < tempRealFiles.length; i++)
+          tempFiles.add(tempRealFiles[i].path);
+      } else {
+        for (int i = 0; i < tempRealFiles.length; i++)
+          tempFiles.add(tempRealFiles[i].path);
+      }
+      print(tempFiles);
+    }
+
+    //*****************SETSTATE****************************
+    if (tempProfile != null) {
+      if (tempProfile != '') {
+        setState(() {
+          isImageExist = true;
+          profileImage = tempProfile;
+        });
+      }
+    }
+    setState(() {
+      userName = tempName;
+    });
+
+    if (tempJob != null) {
+      if (tempJob != '') {
+        setState(() {
+          isJobExist = true;
+          jobTitle = tempJob;
+        });
+      }
+    }
+
+    if (tempSocial != null && tempSocial.isNotEmpty) {
+      print('WTFFFFFFFFFF $tempSocial');
+      setState(() {
+        isSocialExist = true;
+        socialMediaUrl = tempSocial;
+      });
+    }
+
+    if (tempTitles != null && tempTitles.isNotEmpty) {
+      setState(() {
+        isFileExist = true;
+        titles = tempTitles;
+        files = tempFiles;
+      });
+    }
+    setState(() {
+      fetching = false;
+    });
+    print('as${profileImage}asa');
+    print(userName);
+    print(jobTitle);
+    print(socialMediaUrl);
+    print(titles);
+    print(files);
+    print(isImageExist);
+    print(isJobExist);
+    print(isSocialExist);
+    print(isFileExist);
+
+    isImageExist
+        ? await SharedPrefUtils.saveStr('profileImage', profileImage)
+        : await SharedPrefUtils.saveStr('profileImage', def);
+
+    await SharedPrefUtils.saveStr('userName', userName);
+
+    isJobExist
+        ? await SharedPrefUtils.saveStr('jobTitle', jobTitle)
+        : await SharedPrefUtils.saveStr('jobTitle', def);
+
+    isSocialExist
+        ? await SharedPrefUtils.saveStrList('socialLinks', socialMediaUrl)
+        : await SharedPrefUtils.saveStrList('socialLinks', [def]);
+
+    isFileExist
+        ? await SharedPrefUtils.saveStrList('titles', titles)
+        : await SharedPrefUtils.saveStrList('titles', [def]);
+
+    isFileExist
+        ? await SharedPrefUtils.saveStrList('files', files)
+        : await SharedPrefUtils.saveStrList('files', [def]);
+
+    await SharedPrefUtils.saveStr('isFirstTimeCloud', 'no');
+  }
+
+  dataFromSharedPrefs() async {
     String tempProfileImage = await SharedPrefUtils.readPrefStr('profileImage');
     setState(() {
       profileImage = tempProfileImage;
@@ -59,157 +330,26 @@ class _LandingScreenState extends State<LandingScreen> {
       });
     }
 
-    List<String> socialAddedStrList =
-        await SharedPrefUtils.readPrefStrList('socialAddedList');
-    if (socialAddedStrList != null) {
-      if (socialAddedStrList.length > -1) {
-        List<int> socialAddedIntList =
-            socialAddedStrList.map((i) => int.parse(i)).toList();
-        int lastSocialAdded = socialAddedIntList.last;
-        int length = socialAddedIntList.length;
-        List<String> profileListTemp =
-            await SharedPrefUtils.readPrefStrList('profileList');
-        List<String> linkListTemp =
-            await SharedPrefUtils.readPrefStrList('linkList');
-        List<String> formatListTemp =
-            await SharedPrefUtils.readPrefStrList('formatList');
-        List<String> labelListTemp =
-            await SharedPrefUtils.readPrefStrList('labelList');
-
-        Map<int, Map> tempSocial = Map<int, Map>();
-        for (int i = 0; i < length; i++) {
-          tempSocial.addAll({
-            socialAddedIntList[i]: {
-              'profile': {'profile': profileListTemp[i]},
-              'link': {'link': linkListTemp[i]},
-              'format': {'format': formatListTemp[i]},
-              'label': {'label': labelListTemp[i]},
-            }
-          });
-        }
+    List<String> temp = await SharedPrefUtils.readPrefStrList('socialLinks');
+    if (temp != null) {
+      if (temp.isNotEmpty && temp[0] != def) {
         setState(() {
           isSocialExist = true;
-          social = tempSocial;
-          socialAdded = lastSocialAdded + 1;
-          socialAddedList = socialAddedIntList;
-          profileList = profileListTemp;
-          linkList = linkListTemp;
-          formatList = formatListTemp;
-          labelList = labelListTemp;
+          socialMediaUrl = temp;
         });
       }
     }
+
     titles = await SharedPrefUtils.readPrefStrList('titles');
     files = await SharedPrefUtils.readPrefStrList('files');
-    if (titles.elementAt(0) != 'Default' || files.elementAt(0) != 'Default')
+    if (titles.elementAt(0) != def || files.elementAt(0) != def)
       setState(() {
         isFileExist = true;
       });
 
-    await SharedPrefUtils.saveStr('isLogRegDone', 'yes');
-
-    return;
-  }
-
-  @override
-  void initState() {
-    initJobs();
-    super.initState();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
-        bool x =
-            await SystemChannels.platform.invokeMethod('SystemNavigator.pop');
-        return x;
-      },
-      child: Scaffold(
-        backgroundColor: primaryColor,
-        body: AnnotatedRegion<SystemUiOverlayStyle>(
-          value: SystemUiOverlayStyle(statusBarColor: primaryColor),
-          child: SafeArea(
-            child: ListView(
-              children: <Widget>[
-                Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      SizedBox(
-                        height: 50,
-                      ),
-                      CircleAvatar(
-                          radius: 100,
-                          backgroundColor: secondaryColor,
-                          child: isImageExist
-                              ? getProfileIcon()
-                              : getDefaultIcon()),
-                      SizedBox(
-                        height: 10,
-                      ),
-                      Text(
-                        userName,
-                        style: TextStyle(
-                            fontFamily: 'Bellotta',
-                            color: secondaryColor,
-                            fontSize: 30),
-                      ),
-                      Container(
-                        child: isJobExist
-                            ? getJob()
-                            : Container(color: secondaryColor),
-                      ),
-                      SizedBox(
-                        height: 20,
-                      ),
-                      Container(
-                        child: isSocialExist
-                            ? Container(
-                                padding: EdgeInsets.all(20),
-                                decoration: BoxDecoration(
-                                    border: Border.all(
-                                        color: secondaryColor, width: 5),
-                                    borderRadius:
-                                        BorderRadius.all(Radius.circular(20))),
-                                child: makeSocialList())
-                            : SizedBox(height: 0),
-                      ),
-                      SizedBox(
-                        height: 20,
-                      ),
-                      Container(
-                        child: isFileExist
-                            ? Container(
-                                padding: EdgeInsets.all(20),
-                                decoration: BoxDecoration(
-                                    border: Border.all(
-                                        color: secondaryColor, width: 5),
-                                    borderRadius:
-                                        BorderRadius.all(Radius.circular(20))),
-                                child: getFiles())
-                            : SizedBox(height: 0),
-                      ),
-                      FlatButton(
-                        padding: EdgeInsets.all(20),
-                        child: Icon(
-                          Icons.settings,
-                          color: secondaryColor,
-                          size: 40,
-                        ),
-                        onPressed: () {
-                          Navigator.pushNamed(context, SettingsScreen.id);
-                        },
-                      )
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
+    setState(() {
+      fetching = false;
+    });
   }
 
   Container getProfileIcon() {
@@ -235,98 +375,64 @@ class _LandingScreenState extends State<LandingScreen> {
   Text getJob() {
     return Text(
       jobTitle,
-      style: TextStyle(
-          fontFamily: 'Bellotta', color: secondaryColor, fontSize: 20),
+      style: font.copyWith(color: secondaryColor, fontSize: 20),
     );
   }
 
   makeSocialList() {
     List<Widget> socialMedias = [];
-    int length = social.length ~/ 3;
-    if (length >= 1) {
-      for (int i = 1; i <= length; i++) {
-        socialMedias.add(makeSocialRow(itr: 3));
-      }
-      int x = social.length % 3;
-      if (x > 0) {
-        socialMedias.add(makeSocialRow(itr: x));
-      }
-    } else {
-      socialMedias.add(makeSocialRow(itr: social.length));
+    int length = socialMediaUrl.length;
+    for (int i = 0; i < length; i++) {
+      String media = findLabel(socialMediaUrl[i]);
+      IconData ico = findSocialIcon(media);
+      socialMedias.add(makeTile(socialMediaUrl[i], i, media, ico));
     }
-    return Column(
-      children: socialMedias,
-    );
+    return socialMedias;
   }
 
-  makeSocialRow({int itr}) {
-    List<Widget> socialMediasRow = [];
-    for (int i = 0; i < itr; i++) {
-      for (int j = index; j <= social.length; j++) {
-        if (social.containsKey(j)) {
-          index++;
-          IconData icon = findSocialIcon(media: social[j]['label']['label']);
-          socialMediasRow.add(makeTile(social[j], j, icon));
-          break;
-        }
-      }
-    }
+  findSocialIcon(String media) {
+    IconData x;
+    if (media == 'Facebook') x = MyFlutterApp.facebook;
 
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: socialMediasRow,
-    );
+    if (media == 'Instagram') x = MyFlutterApp.instagram;
+
+    if (media == 'Twitter') x = MyFlutterApp.twitter;
+
+    if (media == 'Linked In') x = MyFlutterApp.linkedin;
+
+    if (media == 'Tikitok') x = MyFlutterApp.tiktok;
+
+    if (media == 'Pinterest') x = MyFlutterApp.pinterest;
+
+    if (media == 'Dribbble') x = MyFlutterApp.dribbble;
+
+    if (media == 'Gmail') x = Icons.mail;
+
+    return x;
   }
 
-  findSocialIcon({String media}) {
-    IconData icon;
-    if (media == 'Facebook')
-      icon = MyFlutterApp.facebook;
-    else if (media == 'Instagram')
-      icon = MyFlutterApp.instagram;
-    else if (media == 'Twitter')
-      icon = MyFlutterApp.twitter;
-    else if (media == 'Linkedin')
-      icon = MyFlutterApp.linkedin;
-    else if (media == 'Tiktok')
-      icon = MyFlutterApp.tiktok;
-    else if (media == 'Gmail')
-      icon = Icons.mail_outline;
-    else
-      icon = Icons.battery_unknown;
-    return icon;
-  }
-
-  makeTile(Map m, int index, IconData icon) {
-    String user = m['profile']['profile'];
-    String url = m['link']['link'];
-    String format = m['format']['format'];
-    String label = m['label']['label'];
-    if (format != noFormat) user = user.replaceAll(' ', format);
-
-    String userLink = url + user;
-
+  makeTile(String link, int index, String label, IconData icon) {
     return Padding(
       padding: const EdgeInsets.all(4.0),
       child: GestureDetector(
         onTap: () async {
           if (label == 'Gmail') {
-            if (await canLaunch("mailto:$userLink")) {
-              await launch("mailto:$userLink");
+            if (await canLaunch("mailto:$link")) {
+              await launch("mailto:$link");
             }
           }
-          if (await canLaunch(userLink)) {
+          if (await canLaunch(link)) {
             bool nativeLaunch = await launch(
-              userLink,
+              link,
               forceSafariVC: false,
               forceWebView: false,
               universalLinksOnly: true,
             );
             if (!nativeLaunch) {
-              await launch(userLink, forceWebView: true, forceSafariVC: true);
+              await launch(link, forceWebView: true, forceSafariVC: true);
             }
           } else {
-            throw 'Could not launch $userLink';
+            throw 'Could not launch $link';
           }
         },
         child: CircleAvatar(
@@ -334,55 +440,25 @@ class _LandingScreenState extends State<LandingScreen> {
             backgroundColor: secondaryColor,
             child: Icon(
               icon,
+              size: 30,
               color: primaryColor,
             )),
       ),
     );
   }
 
-  getFiles() {
-    return divideFiles();
-  }
-
-  divideFiles() {
-    n = 0;
-    List<Widget> fileSet = [];
-    int m = files.length;
-    if (m >= 0) {
-      if (m / 3 >= 1) {
-        for (int i = 1; i <= m / 3; i++) {
-          fileSet.add(makeFilesRow(itr: 3));
-        }
-        int x = (m % 3).toInt();
-        if (x > 0) {
-          fileSet.add(makeFilesRow(itr: x));
-        }
-      } else {
-        fileSet.add(makeFilesRow(itr: m));
-      }
-      return Column(
-        children: fileSet,
-      );
-    }
-  }
-
-  makeFilesRow({int itr}) {
+  makeFiles() {
     List<Widget> filesRow = [];
     IconData fileIcon;
-    for (int i = 1; i <= itr; i++) {
-      fileIcon = findIcon(index: n);
-      String text = titles.elementAt(n);
-      filesRow.add(makeFilesRowElement(index: n, ico: fileIcon, title: text));
-      n++;
+    for (int i = 0; i < titles.length; i++) {
+      String text = titles[i];
+      fileIcon = findIcon(text.toUpperCase());
+      filesRow.add(makeFilesRowElement(index: i, ico: fileIcon, title: text));
     }
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: filesRow,
-    );
+    return filesRow;
   }
 
-  findIcon({int index}) {
-    String title = titles.elementAt(index).toUpperCase();
+  findIcon(String title) {
     IconData ico;
 
     if (title.contains('LICENSE') || title.contains('DRIVING')) {

@@ -1,11 +1,14 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:whoami/service/custom_button.dart';
 import 'package:whoami/service/my_flutter_app_icons.dart';
+import 'package:whoami/service/shared_prefs_util.dart';
 
 import '../constants.dart';
+import 'landing_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   static String id = 'LoginScreen';
@@ -16,6 +19,9 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   var buttonTextDecor = TextDecoration.none;
+  String userName;
+  String password;
+  FirebaseAuth _auth = FirebaseAuth.instance;
 
   @override
   Widget build(BuildContext context) {
@@ -61,15 +67,19 @@ class _LoginScreenState extends State<LoginScreen> {
                               Radius.circular(40),
                             ),
                             child: TextField(
-                                onSubmitted: (value) {
-                                  FocusScope.of(context).nextFocus();
-                                },
-                                textInputAction: TextInputAction.next,
-                                textCapitalization: TextCapitalization.words,
-                                cursorColor: primaryColor,
-                                textAlign: TextAlign.center,
-                                decoration: textFieldDecor.copyWith(
-                                    labelText: 'UserName')),
+                              onSubmitted: (value) {
+                                FocusScope.of(context).nextFocus();
+                              },
+                              textInputAction: TextInputAction.next,
+                              textCapitalization: TextCapitalization.words,
+                              cursorColor: primaryColor,
+                              textAlign: TextAlign.center,
+                              decoration: textFieldDecor.copyWith(
+                                  labelText: 'UserName'),
+                              onChanged: (val) {
+                                userName = val;
+                              },
+                            ),
                           ),
                           SizedBox(
                             height: 20,
@@ -81,14 +91,18 @@ class _LoginScreenState extends State<LoginScreen> {
                               Radius.circular(40),
                             ),
                             child: TextField(
-                                obscureText: true,
-                                textInputAction: TextInputAction.go,
-                                textCapitalization: TextCapitalization.words,
-                                cursorColor: primaryColor,
-                                textAlign: TextAlign.center,
-                                decoration: textFieldDecor.copyWith(
-                                  labelText: 'Password',
-                                )),
+                              obscureText: true,
+                              textInputAction: TextInputAction.go,
+                              textCapitalization: TextCapitalization.words,
+                              cursorColor: primaryColor,
+                              textAlign: TextAlign.center,
+                              decoration: textFieldDecor.copyWith(
+                                labelText: 'Password',
+                              ),
+                              onChanged: (val) {
+                                password = val;
+                              },
+                            ),
                           ),
                           SizedBox(
                             height: 20,
@@ -102,8 +116,8 @@ class _LoginScreenState extends State<LoginScreen> {
                                 buttonPadding: EdgeInsets.all(0),
                                 buttonColor: primaryColor,
                                 buttonText: 'Login',
-                                onClick: () {
-                                  doVibrate();
+                                onClick: () async {
+                                  await onLoginClick();
                                 },
                                 textColor: secondaryColor,
                               ),
@@ -119,8 +133,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 },
                                 child: Text(
                                   'Forgot Password?',
-                                  style: TextStyle(
-                                      fontFamily: 'Bellotta',
+                                  style: font.copyWith(
                                       color: primaryColor,
                                       fontSize: 16,
                                       decoration: buttonTextDecor),
@@ -139,5 +152,32 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       ),
     );
+  }
+
+  onLoginClick() async {
+    doVibrate();
+    if (userName == null || password == null)
+      doToast('Please enter all data before submitting');
+    else if (!userName.contains('@') ||
+        !userName.contains('.') ||
+        userName.contains('@.') ||
+        userName.contains('.C') ||
+        userName.endsWith('.'))
+      doToast('Please provide a valid Email');
+    else {
+      try {
+        final user = await _auth.signInWithEmailAndPassword(
+            email: userName, password: password);
+        if (user != null) {
+          await SharedPrefUtils.saveStr('uid', user.user.uid);
+          await SharedPrefUtils.saveStr('isSignUpDone', 'yes');
+          await SharedPrefUtils.saveStr('isFirstTimeCloud', 'yes');
+          Navigator.pushNamedAndRemoveUntil(
+              context, LandingScreen.id, (Route<dynamic> route) => false);
+        }
+      } catch (e) {
+        doToast(e.toString(), bg: primaryColor, txt: secondaryColor);
+      }
+    }
   }
 }

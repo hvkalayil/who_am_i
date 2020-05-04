@@ -4,12 +4,33 @@ import 'package:vibration/vibration.dart';
 
 final Color primaryColor = Colors.lightBlueAccent[100];
 final Color secondaryColor = Colors.white;
-const String def = 'DEFAULT';
+const String def = 'Default';
 const String noFormat = 'NOFORMAT';
 
-class SlideRightRoute extends PageRouteBuilder {
+findLabel(String url) {
+  String x;
+  if (url.contains('facebook')) x = 'Facebook';
+
+  if (url.contains('instagram')) x = 'Instagram';
+
+  if (url.contains('twitter')) x = 'Twitter';
+
+  if (url.contains('linkedin')) x = 'Linked In';
+
+  if (url.contains('tiktok')) x = 'Tikitok';
+
+  if (url.contains('pinterest')) x = 'Pinterest';
+
+  if (url.contains('dribbble')) x = 'Dribbble';
+
+  if (url.contains('gmail')) x = 'Gmail';
+
+  return x;
+}
+
+class SlideRoute extends PageRouteBuilder {
   final Widget widget;
-  SlideRightRoute({this.widget, begin = const Offset(0.0, 1.0)})
+  SlideRoute({this.widget, begin = const Offset(0.0, 1.0)})
       : super(pageBuilder: (BuildContext context, Animation<double> animation,
             Animation<double> secondaryAnimation) {
           return widget;
@@ -27,6 +48,7 @@ class SlideRightRoute extends PageRouteBuilder {
         });
 }
 
+TextStyle font = TextStyle(fontFamily: 'Bellotta');
 var textFieldDecor = InputDecoration(
   labelStyle: TextStyle(color: primaryColor, fontFamily: 'Bellotta'),
   filled: true,
@@ -62,7 +84,7 @@ void doToast(String message,
     {Color bg = Colors.lightBlueAccent, Color txt = Colors.white}) {
   Fluttertoast.showToast(
       msg: message,
-      toastLength: Toast.LENGTH_SHORT,
+      toastLength: Toast.LENGTH_LONG,
       gravity: ToastGravity.CENTER,
       timeInSecForIosWeb: 1,
       backgroundColor: bg,

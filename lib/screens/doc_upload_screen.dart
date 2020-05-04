@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:open_file/open_file.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
@@ -52,23 +53,19 @@ class _DocUploadScreenState extends State<DocUploadScreen> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
-                      Text(
-                        'Add Personal Documents',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
+                      Text('Add Personal Documents',
+                          textAlign: TextAlign.center,
+                          style: font.copyWith(
                             fontWeight: FontWeight.w900,
                             decoration: TextDecoration.underline,
                             fontSize: 36,
                             color: secondaryColor,
-                            fontFamily: 'Bellotta'),
-                      ),
+                          )),
                       Text(
                         'You can skip this step if you want.\n Use Add button below to add documents.',
                         textAlign: TextAlign.center,
-                        style: TextStyle(
-                            fontSize: 18,
-                            color: secondaryColor,
-                            fontFamily: 'Bellotta'),
+                        style:
+                            font.copyWith(fontSize: 18, color: secondaryColor),
                       ),
                     ],
                   ),
@@ -95,11 +92,11 @@ class _DocUploadScreenState extends State<DocUploadScreen> {
                           child: Text(
                             'No Documents Uploaded. Use Add buton to select your document',
                             textAlign: TextAlign.center,
-                            style: TextStyle(
-                                fontWeight: FontWeight.w600,
-                                fontSize: 26,
-                                color: primaryColor.withAlpha(120),
-                                fontFamily: 'Bellotta'),
+                            style: font.copyWith(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 26,
+                              color: primaryColor.withAlpha(120),
+                            ),
                           ),
                         ),
                 ),
@@ -159,7 +156,7 @@ class _DocUploadScreenState extends State<DocUploadScreen> {
         for (int i = 0; i < length; i++) {
           tempfiles.add(File(tempfilepath[i]));
         }
-        if (temptitles != ['Default']) {
+        if (temptitles[0] != 'Default') {
           setState(() {
             isFileThere = true;
             fileAdded = length;
@@ -199,8 +196,10 @@ class _DocUploadScreenState extends State<DocUploadScreen> {
             ),
             Text(
               'Add Document',
-              style: TextStyle(
-                  fontSize: 18, color: primaryColor, fontFamily: 'Bellotta'),
+              style: font.copyWith(
+                fontSize: 18,
+                color: primaryColor,
+              ),
             )
           ],
         ),
@@ -230,8 +229,7 @@ class _DocUploadScreenState extends State<DocUploadScreen> {
         color: primaryColor,
         child: Text(
           text,
-          style: TextStyle(
-              color: secondaryColor, fontFamily: 'Bellotta', fontSize: 24),
+          style: font.copyWith(color: secondaryColor, fontSize: 24),
         ),
       ),
       trailing: GestureDetector(
@@ -253,8 +251,8 @@ class _DocUploadScreenState extends State<DocUploadScreen> {
 
   onFinishClick(BuildContext context) async {
     if (fileAdded == 0) {
-      await SharedPrefUtils.saveStrList('titles', ['Default']);
-      await SharedPrefUtils.saveStrList('files', ['Default']);
+      await SharedPrefUtils.saveStrList('titles', [def]);
+      await SharedPrefUtils.saveStrList('files', [def]);
     } else {
       List<String> tempDoc = [];
       for (int i = 0; i < fileAdded; i++) {
@@ -262,7 +260,13 @@ class _DocUploadScreenState extends State<DocUploadScreen> {
       }
       await SharedPrefUtils.saveStrList('titles', titleList);
       await SharedPrefUtils.saveStrList('files', tempDoc);
+      String isSignUp = await SharedPrefUtils.readPrefStr('isSignUpDone');
+      if (isSignUp == 'yes') {
+        doToast('Upload data to cloud by going into settings',
+            bg: primaryColor, txt: secondaryColor);
+      }
     }
+    await SharedPrefUtils.saveStr('isLogRegDone', 'yes');
     Navigator.pushNamedAndRemoveUntil(
         context, LandingScreen.id, (Route<dynamic> route) => false);
   }
@@ -292,6 +296,25 @@ class _CreateAlertDialogState extends State<CreateAlertDialog> {
 //      });
 //    }
 //  }
+
+  void addCamDocs(BuildContext context) async {
+    File tempFile = await ImagePicker.pickImage(source: ImageSource.camera);
+    var filename = basename(tempFile.path);
+    file = await tempFile.copy('$path/$filename');
+    if (file != null) {
+      setState(() {
+        documents.add(file);
+        fileAdded++;
+        isFileThere = true;
+      });
+      List<String> tempDoc = [];
+      for (int i = 0; i < documents.length; i++) {
+        tempDoc.add(documents[i].path);
+      }
+      SharedPrefUtils.saveStrList('files', tempDoc);
+      Navigator.of(context, rootNavigator: true).pop();
+    }
+  }
 
   void addDocs(BuildContext context) async {
     File tempFile = await FilePicker.getFile();
@@ -326,13 +349,34 @@ class _CreateAlertDialogState extends State<CreateAlertDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text(
-        'Enter Document Details',
-        style: TextStyle(
-            color: primaryColor, fontFamily: 'Bellotta', fontSize: 24),
+      title: Column(
+        children: <Widget>[
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: <Widget>[
+              GestureDetector(
+                onTap: () {
+                  Navigator.pop(context);
+                },
+                child: Icon(
+                  Icons.cancel,
+                  size: 25,
+                  color: primaryColor,
+                ),
+              ),
+            ],
+          ),
+          Text('Document Details',
+              style: font.copyWith(color: primaryColor, fontSize: 24)),
+          Divider(
+            color: primaryColor,
+            thickness: 2,
+            indent: 20,
+            endIndent: 20,
+          ),
+        ],
       ),
-      contentTextStyle:
-          TextStyle(color: primaryColor, fontFamily: 'Bellotta', fontSize: 20),
+      contentTextStyle: font.copyWith(color: primaryColor, fontSize: 20),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
@@ -348,9 +392,7 @@ class _CreateAlertDialogState extends State<CreateAlertDialog> {
 //                      color: primaryColor,
 //                      child: Text(
 //                        'Choose Icon',
-//                        style: TextStyle(
-//                            color: secondaryColor,
-//                            fontFamily: 'Bellotta',
+//                        style: font.copyWith(color: secondaryColor,
 //                            fontSize: 20),
 //                      ),
 //                    ),
@@ -373,13 +415,21 @@ class _CreateAlertDialogState extends State<CreateAlertDialog> {
       ),
       actions: <Widget>[
         FlatButton(
-          onPressed: () {
-            Navigator.pop(context);
+          onPressed: () async {
+            if (docTitle == '' || docTitle == null) {
+              doToast('Please enter a title for your document');
+              return;
+            } else {
+              setState(() {
+                titleList.add(docTitle);
+              });
+              await SharedPrefUtils.saveStrList('titles', titleList);
+              addCamDocs(context);
+            }
           },
           child: Text(
-            'Cancel',
-            style: TextStyle(
-                color: Colors.red, fontFamily: 'Bellotta', fontSize: 20),
+            'Camera',
+            style: font.copyWith(color: primaryColor, fontSize: 20),
           ),
         ),
         FlatButton(
@@ -395,11 +445,8 @@ class _CreateAlertDialogState extends State<CreateAlertDialog> {
               addDocs(this.context);
             }
           },
-          child: Text(
-            'Upload',
-            style: TextStyle(
-                color: primaryColor, fontFamily: 'Bellotta', fontSize: 20),
-          ),
+          child: Text('Gallery',
+              style: font.copyWith(color: primaryColor, fontSize: 20)),
         ),
       ],
     );

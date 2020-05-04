@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "442662118562",
+    "firebase_url": "https://who-am-i-d8752.firebaseio.com",
+    "project_id": "who-am-i-d8752",
+    "storage_bucket": "who-am-i-d8752.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:442662118562:android:dd59bf75b066e38de623fb",
+        "android_client_info": {
+          "package_name": "com.hoseakalayil.whoami"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "442662118562-9najtrpsqrpp42d5ldlmmir5vgkbeb75.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAZkEBXNxEblG0_58x3xBTTHb76NDmWlBA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "442662118562-9najtrpsqrpp42d5ldlmmir5vgkbeb75.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
