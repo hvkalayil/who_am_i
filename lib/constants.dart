@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:vibration/vibration.dart';
 
 final Color primaryColor = Colors.lightBlueAccent[100];
 final Color secondaryColor = Colors.white;
@@ -73,12 +72,6 @@ var textFieldDecor = InputDecoration(
     ),
   ),
 );
-
-void doVibrate() async {
-  if (await Vibration.hasVibrator()) {
-    Vibration.vibrate(duration: 75);
-  }
-}
 
 void doToast(String message,
     {Color bg = Colors.lightBlueAccent, Color txt = Colors.white}) {

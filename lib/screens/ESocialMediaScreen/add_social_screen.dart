@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:whoami/screens/FDocumentUploadScreen/doc_upload_screen.dart';
 import 'package:whoami/service/custom_button.dart';
 import 'package:whoami/service/my_flutter_app_icons.dart';
 import 'package:whoami/service/shared_prefs_util.dart';
 
-import '../constants.dart';
-import 'doc_upload_screen.dart';
+import '../../constants.dart';
 
 List<String> socialMeidaUrls = [];
 
@@ -109,7 +109,6 @@ class _AddSocialScreenState extends State<AddSocialScreen> {
                   CustomButton(
                     buttonText: '< PREVIOUS',
                     onClick: () {
-                      doVibrate();
                       Navigator.pop(context);
                     },
                     buttonColor: secondaryColor,

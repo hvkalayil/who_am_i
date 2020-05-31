@@ -4,11 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:loading_indicator/loading_indicator.dart';
+import 'package:whoami/screens/BLoginRegisterScreen/login_register_screen.dart';
+import 'package:whoami/screens/GHomeScreen/landing_screen.dart';
 import 'package:whoami/service/shared_prefs_util.dart';
 
-import '../constants.dart';
-import 'landing_screen.dart';
-import 'login_register_screen.dart';
+import '../../constants.dart';
 
 class InitialScreen extends StatefulWidget {
   static String id = 'InitialScreen';
@@ -21,17 +21,6 @@ class _InitialScreenState extends State<InitialScreen> {
   double moveImg = 500;
 
   initJobs() async {
-    String temp = await SharedPrefUtils.readPrefStr('isLogRegDone');
-    if (temp == 'yes')
-      isDone = true;
-    else
-      isDone = false;
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    initJobs();
     Timer(Duration(milliseconds: 500), () {
       setState(() {
         moveImg = 0;
@@ -43,6 +32,18 @@ class _InitialScreenState extends State<InitialScreen> {
       else
         Navigator.popAndPushNamed(context, LoginRegisterScreen.id);
     });
+
+    String temp = await SharedPrefUtils.readPrefStr('isLogRegDone');
+    if (temp == 'yes')
+      isDone = true;
+    else
+      isDone = false;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    initJobs();
   }
 
   @override

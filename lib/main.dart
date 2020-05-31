@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:whoami/screens/add_social_screen.dart';
-import 'package:whoami/screens/doc_upload_screen.dart';
-import 'package:whoami/screens/initial_screen.dart';
-import 'package:whoami/screens/landing_screen.dart';
-import 'package:whoami/screens/login_register_screen.dart';
-import 'package:whoami/screens/login_screen.dart';
-import 'package:whoami/screens/registration_screen.dart';
-import 'package:whoami/screens/settings_screen.dart';
-import 'package:whoami/screens/sign_up_screen.dart';
-import 'package:whoami/screens/test_screen.dart';
+import 'package:whoami/screens/ASplashScreen/initial_screen.dart';
+import 'package:whoami/screens/BLoginRegisterScreen/login_register_screen.dart';
+import 'package:whoami/screens/CLoginScreen/login_screen.dart';
+import 'package:whoami/screens/DRegisterScreen/registration_screen.dart';
+import 'package:whoami/screens/ESocialMediaScreen/add_social_screen.dart';
+import 'package:whoami/screens/FDocumentUploadScreen/doc_upload_screen.dart';
+import 'package:whoami/screens/GHomeScreen/landing_screen.dart';
+import 'package:whoami/screens/HSettingsScreen/settings_screen.dart';
+import 'package:whoami/screens/HSettingsScreen/sign_up_screen.dart';
 
 void main() => runApp(MyApp());
 

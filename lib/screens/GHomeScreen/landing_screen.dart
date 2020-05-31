@@ -1,19 +1,20 @@
 import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:http/http.dart' as http;
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:whoami/screens/settings_screen.dart';
+import 'package:whoami/screens/HSettingsScreen/settings_screen.dart';
 import 'package:whoami/service/my_flutter_app_icons.dart';
 import 'package:whoami/service/shared_prefs_util.dart';
-import '../constants.dart';
-import 'package:http/http.dart' as http;
+
+import '../../constants.dart';
 
 class LandingScreen extends StatefulWidget {
   static String id = 'LandingScreen';
@@ -33,9 +34,9 @@ class _LandingScreenState extends State<LandingScreen> {
   http.Client httpClient = http.Client();
   bool fetching = true;
   QuerySnapshot messages;
-  StorageFileDownloadTask _task;
-  final FirebaseStorage _storage =
-      FirebaseStorage(storageBucket: 'gs://who-am-i-d8752.appspot.com');
+//  StorageFileDownloadTask _task;
+//  final FirebaseStorage _storage =
+//      FirebaseStorage(storageBucket: 'gs://who-am-i-d8752.appspot.com');
   bool useCloud;
 
   @override

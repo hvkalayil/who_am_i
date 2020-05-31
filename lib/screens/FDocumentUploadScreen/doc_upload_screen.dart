@@ -9,11 +9,11 @@ import 'package:image_picker/image_picker.dart';
 import 'package:open_file/open_file.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:whoami/screens/landing_screen.dart';
+import 'package:whoami/screens/GHomeScreen/landing_screen.dart';
 import 'package:whoami/service/custom_button.dart';
 import 'package:whoami/service/shared_prefs_util.dart';
 
-import '../constants.dart';
+import '../../constants.dart';
 
 //List<IconData> iconList = [];
 
@@ -115,7 +115,6 @@ class _DocUploadScreenState extends State<DocUploadScreen> {
                   CustomButton(
                     buttonText: '< PREVIOUS',
                     onClick: () {
-                      doVibrate();
                       Navigator.pop(context);
                     },
                     buttonColor: secondaryColor,
@@ -298,7 +297,8 @@ class _CreateAlertDialogState extends State<CreateAlertDialog> {
 //  }
 
   void addCamDocs(BuildContext context) async {
-    File tempFile = await ImagePicker.pickImage(source: ImageSource.camera);
+    ImagePicker picker = new ImagePicker();
+    File tempFile = (await picker.getImage(source: ImageSource.camera)) as File;
     var filename = basename(tempFile.path);
     file = await tempFile.copy('$path/$filename');
     if (file != null) {

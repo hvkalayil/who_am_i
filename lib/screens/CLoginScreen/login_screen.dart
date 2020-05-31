@@ -3,12 +3,12 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:whoami/screens/GHomeScreen/landing_screen.dart';
 import 'package:whoami/service/custom_button.dart';
 import 'package:whoami/service/my_flutter_app_icons.dart';
 import 'package:whoami/service/shared_prefs_util.dart';
 
-import '../constants.dart';
-import 'landing_screen.dart';
+import '../../constants.dart';
 
 class LoginScreen extends StatefulWidget {
   static String id = 'LoginScreen';
@@ -126,7 +126,6 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                               GestureDetector(
                                 onTap: () {
-                                  doVibrate();
                                   setState(() {
                                     buttonTextDecor = TextDecoration.underline;
                                   });
@@ -155,7 +154,6 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   onLoginClick() async {
-    doVibrate();
     if (userName == null || password == null)
       doToast('Please enter all data before submitting');
     else if (!userName.contains('@') ||
