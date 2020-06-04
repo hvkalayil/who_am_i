@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:whoami/global.dart' as global;
+import 'package:whoami/screens/HSettingsScreen/sign_up_screen.dart';
 import 'package:whoami/service/custom_button.dart';
 import 'package:whoami/service/shared_prefs_util.dart';
 
@@ -119,41 +120,67 @@ class _SignUpCardState extends State<SignUpCard> {
               onClick: () async {
                 bool tempCon = await global.checkConn();
                 if (tempCon) {
-                  if (id == null || pass == null)
-                    doToast('Please enter all data before submitting');
+                  //Null Checking
+                  if (id == null || pass == null || id == '' || pass == '') {
+                    doToast('Please enter mailId and password');
+                  }
+
+                  //Validation
                   else if (!id.contains('@') ||
                       !id.contains('.') ||
                       id.contains('@.') ||
-                      id.endsWith('.'))
+                      id.endsWith('.')) {
                     doToast('Please provide a valid Email');
+                  }
+
+                  //Good Data
                   else {
+                    //Start Spinner
                     setState(() {
                       global.isRunning = true;
                     });
+
+                    //Try creating user
+                    AuthResult result;
                     try {
-                      final result = await _auth.createUserWithEmailAndPassword(
+                      result = await _auth.createUserWithEmailAndPassword(
                           email: id, password: pass);
-                      if (result != null) {
-                        SharedPrefUtils.saveStr('isSignUpDone', 'yes');
-                        setState(() {
-                          global.user = result.user;
-                          global.uid = global.user.uid;
-                          global.isRunning = false;
-                          global.isSignDone = true;
-                          global.moveCard = -500;
-                          global.options = 0;
-                        });
-                        await SharedPrefUtils.saveStr('uid', global.uid);
-                      }
                     } catch (e) {
-                      doToast(e.toString(),
+                      doToast(e.toString().split(',')[1],
                           bg: primaryColor, txt: secondaryColor);
+                      setState(() {
+                        global.isRunning = false;
+                      });
+                      return;
                     }
-                    setState(() {
-                      global.isRunning = false;
-                    });
+
+                    //User Created
+                    if (result != null) {
+                      await SharedPrefUtils.saveStr('isSignUpDone', 'yes');
+                      setState(() {
+                        global.user = result.user;
+                        global.uid = global.user.uid;
+                        global.isRunning = false;
+                        global.isSignDone = true;
+                        global.moveCard = -500;
+                        global.options = 0;
+                      });
+                      await SharedPrefUtils.saveStr('uid', global.uid);
+                      Navigator.popAndPushNamed(context, SignUpScreen.id);
+                    }
+
+                    //UnkNown Issue
+                    else {
+                      setState(() {
+                        global.isRunning = false;
+                      });
+                      doToast('There has been some issue! Try again.');
+                    }
                   }
-                } else {
+                }
+
+                //NO Connection
+                else {
                   doToast('Please connect to internet and try again',
                       bg: Colors.red.shade400, txt: secondaryColor);
                 }

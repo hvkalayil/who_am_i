@@ -10,7 +10,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:whoami/constants.dart';
-import 'package:whoami/screens/ESocialMediaScreen/add_social_screen.dart';
+import 'package:whoami/screens/ESocialMediaScreen/setup_social_medias.dart';
 import 'package:whoami/service/custom_button.dart';
 import 'package:whoami/service/my_flutter_app_icons.dart';
 import 'package:whoami/service/shared_prefs_util.dart';
@@ -23,7 +23,6 @@ class RegistrationScreen extends StatefulWidget {
 
 class _RegistrationScreenState extends State<RegistrationScreen> {
   File _image;
-  bool isNameGiven = false, isJobGiven = false;
   String path, userName, jobTitle;
   double nxtBtn = 500;
 
@@ -113,9 +112,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                             Radius.circular(40),
                           ),
                           child: TextField(
-                              controller: isNameGiven
-                                  ? TextEditingController(text: userName)
-                                  : TextEditingController(),
+                              controller: TextEditingController(text: userName),
                               onChanged: (value) {
                                 userName = value;
                               },
@@ -139,9 +136,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                             Radius.circular(40),
                           ),
                           child: TextField(
-                              controller: isJobGiven
-                                  ? TextEditingController(text: jobTitle)
-                                  : TextEditingController(),
+                              controller: TextEditingController(text: jobTitle),
                               onChanged: (value) {
                                 jobTitle = value;
                               },
@@ -201,16 +196,12 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       String tempName = await SharedPrefUtils.readPrefStr('userName');
       String tempJob = await SharedPrefUtils.readPrefStr('jobTitle');
       setState(() {
-        isNameGiven = true;
         userName = tempName;
 
         if (tempImage != def) _image = File(tempImage);
 
         if (tempJob != def) {
-          isJobGiven = true;
           jobTitle = tempJob;
-        } else {
-          isJobGiven = false;
         }
       });
     }
@@ -270,6 +261,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       SharedPrefUtils.saveStr('jobTitle', jobTitle);
     }
     Navigator.push(this.context,
-        SlideRoute(widget: AddSocialScreen(), begin: Offset(1, 0)));
+        SlideRoute(widget: SetupSocialMedias(), begin: Offset(1, 0)));
   }
 }

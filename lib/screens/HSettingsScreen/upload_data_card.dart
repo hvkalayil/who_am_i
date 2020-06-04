@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:path/path.dart';
 import 'package:whoami/constants.dart';
 import 'package:whoami/global.dart' as global;
+import 'package:whoami/screens/HSettingsScreen/encrypt_data.dart';
 import 'package:whoami/service/shared_prefs_util.dart';
 
 class UploadDataCard extends StatefulWidget {
@@ -239,14 +240,18 @@ class _UploadDataCardState extends State<UploadDataCard> {
                           details.addAll({'titles': titles});
 
                           for (int i = 0; i < filesList.length; i++) {
-                            fileNames.add(basename(filesList[i]));
                             String path = filesList[i];
                             if (path != def) {
-                              File file = File(path);
+                              File file = File(EncryptData.encrypt_file(path));
+                              String baseName = basename(file.path);
+                              fileNames.add(baseName);
                               setState(() {
                                 _task = _storage
                                     .ref()
-                                    .child('user/' + global.uid + '/' + path)
+                                    .child('user/' +
+                                        global.uid +
+                                        '/images/' +
+                                        baseName)
                                     .putFile(file);
                               });
                               StorageTaskSnapshot takeSnapshot =
@@ -303,6 +308,11 @@ class _UploadDataCardState extends State<UploadDataCard> {
                 ),
               ],
             ),
+          ),
+          Text(
+            'Files are encrypted before upload 🔐',
+            style: font.copyWith(
+                color: secondaryColor.withOpacity(0.5), fontSize: 20),
           ),
           _task != null
               ? AnimatedContainer(

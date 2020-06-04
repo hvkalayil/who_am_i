@@ -6,25 +6,25 @@ final Color secondaryColor = Colors.white;
 const String def = 'Default';
 const String noFormat = 'NOFORMAT';
 
+Map<String, Map<String, String>> medias = {
+  'facebook': {'https://www.facebook.com/': '.'},
+  'instagram': {'https://www.instagram.com/': noFormat},
+  'twitter': {'https://twitter.com/': noFormat},
+  'linkedin': {
+    'https://www.linkedin.com/search/results/people/?keywords=': '%20'
+  },
+  'tiktok': {'https://www.tiktok.com/@': noFormat},
+  'pinterest': {'https://in.pinterest.com/': noFormat},
+  'dribbble': {'https://dribbble.com/': noFormat},
+  'gmail': {'https://www.gmail.com': noFormat},
+};
+
 findLabel(String url) {
-  String x;
-  if (url.contains('facebook')) x = 'Facebook';
-
-  if (url.contains('instagram')) x = 'Instagram';
-
-  if (url.contains('twitter')) x = 'Twitter';
-
-  if (url.contains('linkedin')) x = 'Linked In';
-
-  if (url.contains('tiktok')) x = 'Tikitok';
-
-  if (url.contains('pinterest')) x = 'Pinterest';
-
-  if (url.contains('dribbble')) x = 'Dribbble';
-
-  if (url.contains('gmail')) x = 'Gmail';
-
-  return x;
+  for (var name in medias.keys) {
+    if (url.contains(name)) {
+      return name.substring(0, 1).toUpperCase() + name.substring(1);
+    }
+  }
 }
 
 class SlideRoute extends PageRouteBuilder {
@@ -47,11 +47,11 @@ class SlideRoute extends PageRouteBuilder {
         });
 }
 
-TextStyle font = TextStyle(fontFamily: 'Bellotta');
+TextStyle font = TextStyle(fontFamily: 'Quicksand');
 var textFieldDecor = InputDecoration(
-  labelStyle: TextStyle(color: primaryColor, fontFamily: 'Bellotta'),
+  labelStyle: TextStyle(color: primaryColor, fontFamily: 'Quicksand'),
   filled: true,
-  hintStyle: TextStyle(color: primaryColor, fontFamily: 'Bellotta'),
+  hintStyle: TextStyle(color: primaryColor, fontFamily: 'Quicksand'),
   fillColor: Colors.white,
   border: OutlineInputBorder(
     borderSide: BorderSide(width: 0),

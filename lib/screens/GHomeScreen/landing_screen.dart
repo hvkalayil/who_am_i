@@ -5,11 +5,14 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:http/http.dart' as http;
+import 'package:icons_helper/icons_helper.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:whoami/screens/HSettingsScreen/encrypt_data.dart';
 import 'package:whoami/screens/HSettingsScreen/settings_screen.dart';
 import 'package:whoami/service/my_flutter_app_icons.dart';
 import 'package:whoami/service/shared_prefs_util.dart';
@@ -25,6 +28,7 @@ class LandingScreen extends StatefulWidget {
 class _LandingScreenState extends State<LandingScreen> {
   String profileImage = '', userName = '', jobTitle = '';
   List<String> socialMediaUrl = [];
+  List<String> socialMediaTitles = [];
   List<String> files, titles;
   bool isImageExist = false,
       isJobExist = false,
@@ -149,6 +153,10 @@ class _LandingScreenState extends State<LandingScreen> {
   initJobs() async {
     String isDone = await SharedPrefUtils.readPrefStr('isSignUpDone');
     String isCloud = await SharedPrefUtils.readPrefStr('isFirstTimeCloud');
+    print(EncryptData.encrypt_file(
+        '/data/user/0/com.hoseakalayil.whoami/app_flutter/images (4).jpeg'));
+    print(EncryptData.decrypt_file(
+        '/data/user/0/com.hoseakalayil.whoami/app_flutter/images (4).jpeg.aes'));
 
     if (isDone == 'yes' && isCloud == 'yes') {
       print('something');
@@ -223,10 +231,10 @@ class _LandingScreenState extends State<LandingScreen> {
       if (tempRealFiles.length != tempTitles.length) {
         tempProfile = tempRealFiles[0].path;
         for (int i = 1; i < tempRealFiles.length; i++)
-          tempFiles.add(tempRealFiles[i].path);
+          tempFiles.add(EncryptData.decrypt_file(tempRealFiles[i].path));
       } else {
         for (int i = 0; i < tempRealFiles.length; i++)
-          tempFiles.add(tempRealFiles[i].path);
+          tempFiles.add(EncryptData.decrypt_file(tempRealFiles[i].path));
       }
       print(tempFiles);
     }
@@ -334,15 +342,20 @@ class _LandingScreenState extends State<LandingScreen> {
     List<String> temp = await SharedPrefUtils.readPrefStrList('socialLinks');
     if (temp != null) {
       if (temp.isNotEmpty && temp[0] != def) {
+        List<String> tempTitles =
+            await SharedPrefUtils.readPrefStrList('socialTitles');
         setState(() {
           isSocialExist = true;
           socialMediaUrl = temp;
+          socialMediaTitles = tempTitles;
         });
       }
     }
 
     titles = await SharedPrefUtils.readPrefStrList('titles');
     files = await SharedPrefUtils.readPrefStrList('files');
+    File file = File(EncryptData.decrypt_file(files[0]));
+    print(file);
     if (titles.elementAt(0) != def || files.elementAt(0) != def)
       setState(() {
         isFileExist = true;
@@ -384,32 +397,28 @@ class _LandingScreenState extends State<LandingScreen> {
     List<Widget> socialMedias = [];
     int length = socialMediaUrl.length;
     for (int i = 0; i < length; i++) {
-      String media = findLabel(socialMediaUrl[i]);
-      IconData ico = findSocialIcon(media);
-      socialMedias.add(makeTile(socialMediaUrl[i], i, media, ico));
+      String media = socialMediaTitles[i];
+      IconData ic = findSocialIcon(media);
+      socialMedias.add(makeTile(socialMediaUrl[i], i, media, ic));
     }
     return socialMedias;
   }
 
-  findSocialIcon(String media) {
-    IconData x;
-    if (media == 'Facebook') x = MyFlutterApp.facebook;
-
-    if (media == 'Instagram') x = MyFlutterApp.instagram;
-
-    if (media == 'Twitter') x = MyFlutterApp.twitter;
-
-    if (media == 'Linked In') x = MyFlutterApp.linkedin;
-
-    if (media == 'Tikitok') x = MyFlutterApp.tiktok;
-
-    if (media == 'Pinterest') x = MyFlutterApp.pinterest;
-
-    if (media == 'Dribbble') x = MyFlutterApp.dribbble;
-
-    if (media == 'Gmail') x = Icons.mail;
-
-    return x;
+  IconData findSocialIcon(String media) {
+    IconData ico;
+    if (media == 'gmail') {
+      ico = Icons.mail_outline;
+    } else if (media == 'tiktok') {
+      ico = MyFlutterApp.tiktok;
+    } else if (getFontAwesomeIcon(
+            name: media.substring(0, 1).toLowerCase() + media.substring(1)) ==
+        null) {
+      ico = FontAwesomeIcons.questionCircle;
+    } else {
+      ico = getFontAwesomeIcon(
+          name: media.substring(0, 1).toLowerCase() + media.substring(1));
+    }
+    return ico;
   }
 
   makeTile(String link, int index, String label, IconData icon) {

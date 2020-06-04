@@ -3,7 +3,7 @@ import 'package:whoami/screens/ASplashScreen/initial_screen.dart';
 import 'package:whoami/screens/BLoginRegisterScreen/login_register_screen.dart';
 import 'package:whoami/screens/CLoginScreen/login_screen.dart';
 import 'package:whoami/screens/DRegisterScreen/registration_screen.dart';
-import 'package:whoami/screens/ESocialMediaScreen/add_social_screen.dart';
+import 'package:whoami/screens/ESocialMediaScreen/setup_social_medias.dart';
 import 'package:whoami/screens/FDocumentUploadScreen/doc_upload_screen.dart';
 import 'package:whoami/screens/GHomeScreen/landing_screen.dart';
 import 'package:whoami/screens/HSettingsScreen/settings_screen.dart';
@@ -29,7 +29,7 @@ class _MyAppState extends State<MyApp> {
         DocUploadScreen.id: (context) => DocUploadScreen(),
         LandingScreen.id: (context) => LandingScreen(),
         SettingsScreen.id: (context) => SettingsScreen(),
-        AddSocialScreen.id: (context) => AddSocialScreen(),
+        SetupSocialMedias.id: (context) => SetupSocialMedias(),
       },
       debugShowCheckedModeBanner: false,
       home: InitialScreen(),

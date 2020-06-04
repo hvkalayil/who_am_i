@@ -285,17 +285,6 @@ class _CreateAlertDialogState extends State<CreateAlertDialog> {
   File file;
   String path;
 
-  //TODO: Provide as an Update later
-//  void pickIcon(BuildContext context) async {
-//    IconData tempicon = await FlutterIconPicker.showIconPicker(context);
-//    if (tempicon != null) {
-//      setState(() {
-//        isIconSet = true;
-//        icon = tempicon;
-//      });
-//    }
-//  }
-
   void addCamDocs(BuildContext context) async {
     ImagePicker picker = new ImagePicker();
     File tempFile = (await picker.getImage(source: ImageSource.camera)) as File;
@@ -380,24 +369,6 @@ class _CreateAlertDialogState extends State<CreateAlertDialog> {
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          //PART of UPDATE
-//          Row(
-//            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//            children: <Widget>[
-//              Text('Icon:'),
-//              isIconSet
-//                  ? Icon(icon)
-//                  : RaisedButton(
-//                      onPressed: () => pickIcon(context),
-//                      color: primaryColor,
-//                      child: Text(
-//                        'Choose Icon',
-//                        style: font.copyWith(color: secondaryColor,
-//                            fontSize: 20),
-//                      ),
-//                    ),
-//            ],
-//          ),
           SizedBox(
             height: 20,
           ),

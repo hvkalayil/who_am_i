@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:whoami/screens/BLoginRegisterScreen/login_register_screen.dart';
 import 'package:whoami/screens/DRegisterScreen/registration_screen.dart';
@@ -76,9 +77,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
               makeOptions(
                   context: context, ico: Icons.contact_mail, txt: 'Contact me'),
               makeDivider(),
+              makeOptions(context: context, ico: Icons.info, txt: 'About App'),
+              makeDivider(),
               isSignUpDone
                   ? makeOptions(
-                      context: context, ico: Icons.contact_mail, txt: 'Log Out')
+                      context: context,
+                      ico: FontAwesomeIcons.powerOff,
+                      txt: 'Log Out')
                   : SizedBox(
                       width: 0,
                     ),
@@ -87,8 +92,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   : SizedBox(
                       width: 0,
                     ),
-              makeOptions(context: context, ico: Icons.info, txt: 'About App'),
-              makeDivider(),
             ],
           ),
         ),
@@ -104,14 +107,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         else if (txt == 'Upload to cloud') {
           Navigator.popAndPushNamed(context, SignUpScreen.id);
         }
-//      else if (txt == 'Get Ad free version'){
-//        var url = 'url to app';
-//        if (await canLaunch(url)) {
-//          await launch(url);
-//        } else {
-//          throw 'Could not launch $url';
-//        }
-//      }
+
         //Bug Report
         else if (txt == 'Report bug') {
           var url = 'mailto:hoseakalayil@gmail.com?'
@@ -124,6 +120,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             throw 'Could not launch $url';
           }
         }
+
         //Contact
         else if (txt == 'Contact me') {
           var url =
@@ -135,6 +132,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             throw 'Could not launch $url';
           }
         }
+
         //About App
         else if (txt == 'About App') {
           showAboutDialog(
@@ -148,6 +146,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     'encrypted before storing in the cloud.')
               ]);
         }
+
         //Log Out
         else if (txt == 'Log Out') {
           showDialog(

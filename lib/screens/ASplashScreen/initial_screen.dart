@@ -17,7 +17,7 @@ class InitialScreen extends StatefulWidget {
 }
 
 class _InitialScreenState extends State<InitialScreen> {
-  bool isDone;
+  bool isDone = false;
   double moveImg = 500;
 
   initJobs() async {

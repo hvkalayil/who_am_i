@@ -1,3 +1,6 @@
+# KeyStore
+KeyStore/
+key.properties
 # Miscellaneous
 *.class
 *.log

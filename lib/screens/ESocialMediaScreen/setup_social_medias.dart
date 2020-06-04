@@ -1,23 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:whoami/constants.dart';
+import 'package:whoami/screens/ESocialMediaScreen/alert_add_profile.dart';
 import 'package:whoami/screens/FDocumentUploadScreen/doc_upload_screen.dart';
 import 'package:whoami/service/custom_button.dart';
-import 'package:whoami/service/my_flutter_app_icons.dart';
 import 'package:whoami/service/shared_prefs_util.dart';
 
-import '../../constants.dart';
-
-List<String> socialMeidaUrls = [];
-
-class AddSocialScreen extends StatefulWidget {
+class SetupSocialMedias extends StatefulWidget {
   static String id = 'AddSocial Screen';
   @override
-  _AddSocialScreenState createState() => _AddSocialScreenState();
+  _SetupSocialMediasState createState() => _SetupSocialMediasState();
 }
 
-class _AddSocialScreenState extends State<AddSocialScreen> {
+class _SetupSocialMediasState extends State<SetupSocialMedias> {
   bool isSocialExist = false;
+  List<String> socialMediaUrls = [];
+  List<String> socialMediaTitles = [];
 
   @override
   void initState() {
@@ -84,7 +83,7 @@ class _AddSocialScreenState extends State<AddSocialScreen> {
                       ? ListView(children: makeSocialList())
                       : Center(
                           child: Text(
-                            'No Profiles Added. Use Add buton to add',
+                            'No Profiles Added. Use Add button to add',
                             textAlign: TextAlign.center,
                             style: font.copyWith(
                               fontWeight: FontWeight.w600,
@@ -95,7 +94,7 @@ class _AddSocialScreenState extends State<AddSocialScreen> {
                         ),
                 ),
               ),
-              makeButton(context),
+              makeButton(context, 'Add Profile'),
               SizedBox(
                 height: 20,
               ),
@@ -143,22 +142,25 @@ class _AddSocialScreenState extends State<AddSocialScreen> {
     List<String> temp = await SharedPrefUtils.readPrefStrList('socialLinks');
     if (temp != null) {
       if (temp.isNotEmpty && temp[0] != def) {
+        List<String> tempTitles =
+            await SharedPrefUtils.readPrefStrList('socialTitles');
         setState(() {
-          socialMeidaUrls = temp;
+          socialMediaUrls = temp;
+          socialMediaTitles = tempTitles;
           isSocialExist = true;
         });
       }
     }
   }
 
-  Container makeButton(BuildContext context) {
+  Container makeButton(BuildContext context, String txt) {
     return Container(
       margin: EdgeInsets.only(top: 20, left: 0, right: 0, bottom: 0),
       child: RaisedButton(
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.all(Radius.circular(40))),
         color: secondaryColor,
-        onPressed: () => addClick(context),
+        onPressed: () => addClick(context, txt),
         textTheme: ButtonTextTheme.accent,
         padding: EdgeInsets.all(20),
         child: Row(
@@ -169,7 +171,7 @@ class _AddSocialScreenState extends State<AddSocialScreen> {
               color: primaryColor,
             ),
             Text(
-              'Add Profile',
+              txt,
               style: font.copyWith(
                 fontSize: 18,
                 color: primaryColor,
@@ -181,30 +183,31 @@ class _AddSocialScreenState extends State<AddSocialScreen> {
     );
   }
 
-  addClick(BuildContext context) async {
+  addClick(BuildContext context, String txt) async {
     await showDialog(
         context: context,
         builder: (_) {
-          return CreateAlertDialog();
+          return AlertAddProfile();
         });
-    Navigator.popAndPushNamed(context, AddSocialScreen.id);
+    Navigator.popAndPushNamed(context, SetupSocialMedias.id);
   }
 
   onNextClick() async {
     if (!isSocialExist) {
-      socialMeidaUrls.add(def);
+      socialMediaUrls.add(def);
+      socialMediaTitles.add(def);
     }
-    await SharedPrefUtils.saveStrList('socialLinks', socialMeidaUrls);
+    await SharedPrefUtils.saveStrList('socialTitles', socialMediaTitles);
+    await SharedPrefUtils.saveStrList('socialLinks', socialMediaUrls);
     Navigator.push(
         context, SlideRoute(widget: DocUploadScreen(), begin: Offset(1, 0)));
   }
 
-  makeSocialList() {
+  List<ListTile> makeSocialList() {
     List<ListTile> socialMedias = [];
-    int length = socialMeidaUrls.length;
+    int length = socialMediaUrls.length;
     for (int i = 0; i < length; i++) {
-      String media = findLabel(socialMeidaUrls[i]);
-      socialMedias.add(makeTile(socialMeidaUrls[i], i, media));
+      socialMedias.add(makeTile(socialMediaUrls[i], i, socialMediaTitles[i]));
     }
     return socialMedias;
   }
@@ -242,8 +245,8 @@ class _AddSocialScreenState extends State<AddSocialScreen> {
       trailing: GestureDetector(
         onTap: () async {
           setState(() {
-            socialMeidaUrls.removeAt(i);
-            if (socialMeidaUrls.isEmpty) isSocialExist = false;
+            socialMediaUrls.removeAt(i);
+            if (socialMediaUrls.isEmpty) isSocialExist = false;
           });
         },
         child: Icon(
@@ -251,179 +254,6 @@ class _AddSocialScreenState extends State<AddSocialScreen> {
           color: Colors.red,
         ),
       ),
-    );
-  }
-}
-
-class CreateAlertDialog extends StatefulWidget {
-  static String id = 'CreateAlertDialog';
-  @override
-  _CreateAlertDialogState createState() => _CreateAlertDialogState();
-}
-
-class _CreateAlertDialogState extends State<CreateAlertDialog> {
-  String profile, url = 'https://www.facebook.com/', form = '.';
-  Icon selectedIcon = Icon(
-    MyFlutterApp.facebook,
-    color: primaryColor,
-  );
-  String label = 'Facebook';
-  makeIcons() {
-    List<DropdownMenuItem> iconSets = [];
-    iconSets.add(makeSingleIcons(
-        ico: MyFlutterApp.facebook,
-        txt: 'Facebook',
-        link: 'https://www.facebook.com/',
-        format: '.'));
-    iconSets.add(makeSingleIcons(
-        ico: MyFlutterApp.instagram,
-        txt: 'Instagram',
-        link: 'https://www.instagram.com/',
-        format: noFormat));
-    iconSets.add(makeSingleIcons(
-        ico: MyFlutterApp.twitter,
-        txt: 'Twitter',
-        link: 'https://twitter.com/',
-        format: noFormat));
-    iconSets.add(makeSingleIcons(
-        ico: MyFlutterApp.linkedin,
-        txt: 'Linkedin',
-        link: 'https://www.linkedin.com/search/results/people/?keywords=',
-        format: '%20'));
-    iconSets.add(makeSingleIcons(
-        ico: MyFlutterApp.tiktok,
-        txt: 'Tikitok',
-        link: 'https://www.tiktok.com/@',
-        format: noFormat));
-    iconSets.add(makeSingleIcons(
-        ico: MyFlutterApp.pinterest,
-        txt: 'Pinterest',
-        link: 'https://in.pinterest.com/',
-        format: noFormat));
-    iconSets.add(makeSingleIcons(
-        ico: MyFlutterApp.dribbble,
-        txt: 'Dribble',
-        link: 'https://dribbble.com/',
-        format: noFormat));
-    iconSets.add(makeSingleIcons(
-        ico: Icons.mail,
-        txt: 'Gmail',
-        link: 'https://www.gmail.com',
-        format: noFormat));
-    return iconSets;
-  }
-
-  makeSingleIcons({IconData ico, String txt, String link, String format}) {
-    return DropdownMenuItem(
-      value: {
-        'icon': {'icon': ico},
-        'text': {'text': txt},
-        'link': {'link': link},
-        'format': {'format': format},
-      },
-      child: Icon(ico),
-    );
-  }
-
-  String hintTxt = 'Facebook';
-  int selectedIndex;
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      title: Column(
-        children: <Widget>[
-          Text(
-            'Social Media Profile',
-            textAlign: TextAlign.center,
-            style: font.copyWith(color: primaryColor, fontSize: 24),
-          ),
-          Divider(
-            color: primaryColor,
-            thickness: 2,
-            indent: 20,
-            endIndent: 20,
-          ),
-        ],
-      ),
-      contentTextStyle: font.copyWith(color: primaryColor, fontSize: 20),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-//              Text('Social Media'),
-              DropdownButton(
-                hint: Text(
-                  hintTxt,
-                  style: font.copyWith(color: primaryColor, fontSize: 20),
-                ),
-                focusColor: primaryColor,
-                iconEnabledColor: primaryColor,
-                icon: selectedIcon,
-                items: makeIcons(),
-                onChanged: (val) {
-                  Map m = val['icon'];
-                  Map n = val['text'];
-                  Map o = val['link'];
-                  Map p = val['format'];
-                  setState(() {
-                    selectedIcon = Icon(
-                      m['icon'],
-                      color: primaryColor,
-                    );
-                    label = n['text'];
-                    hintTxt = n['text'];
-                    url = o['link'];
-                    form = p['format'];
-                  });
-                },
-              ),
-            ],
-          ),
-          SizedBox(height: 10),
-          TextField(
-            onChanged: (value) {
-              profile = value;
-            },
-            decoration: textFieldDecor.copyWith(labelText: 'Enter $label id'),
-          )
-        ],
-      ),
-      actions: <Widget>[
-        FlatButton(
-          onPressed: () {
-            Navigator.pop(context);
-          },
-          child: Text('Cancel',
-              style: font.copyWith(color: Colors.red, fontSize: 20)),
-        ),
-        FlatButton(
-          onPressed: () async {
-            if (profile == '' || profile == null) {
-              doToast('Please enter user name');
-              return;
-            } else {
-              String userNameforLink = profile;
-              if (form != noFormat) {
-                userNameforLink.replaceAll(' ', form);
-              }
-
-              setState(() {
-                socialMeidaUrls.add(url + userNameforLink);
-              });
-
-              await SharedPrefUtils.saveStrList('socialLinks', socialMeidaUrls);
-              Navigator.of(context, rootNavigator: true).pop();
-            }
-          },
-          child: Text(
-            'Done!',
-            style: font.copyWith(color: primaryColor, fontSize: 20),
-          ),
-        ),
-      ],
     );
   }
 }

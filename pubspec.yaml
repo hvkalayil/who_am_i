@@ -29,7 +29,6 @@ dependencies:
   vibration:
   fluttertoast:
   file_picker:
-  flutter_iconpicker:
   open_file:
   url_launcher:
   loading_indicator:
@@ -38,6 +37,9 @@ dependencies:
   cloud_firestore:
   firebase_storage:
   modal_progress_hud:
+  font_awesome_flutter:
+  icons_helper:
+  aes_crypt:
 
 
 
@@ -79,6 +81,9 @@ flutter:
     - family: Bellotta
       fonts:
         - asset: fonts/Bellota-Regular.ttf
+    - family: Quicksand
+      fonts:
+        - asset: fonts/quicksand.ttf
     - family: MyFlutterApp
       fonts:
             - asset: fonts/MyFlutterApp.ttf
