@@ -224,9 +224,11 @@ class _AlertAddProfileState extends State<AlertAddProfile> {
 
   DropdownMenuItem addEachIcon(
       String mediaName, Map<String, String> mediaLinks) {
-    String url;
-    for (var link in mediaLinks.keys) url = link;
-    String format = mediaLinks[0];
+    String url, format;
+    for (var link in mediaLinks.keys) {
+      url = link;
+      format = mediaLinks[link];
+    }
     String tempName =
         mediaName.substring(0, 1).toUpperCase() + mediaName.substring(1);
     IconData ic = getIconGuessFavorFA(name: mediaName);

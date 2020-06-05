@@ -8,6 +8,7 @@ import 'package:flutter/widgets.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:icons_helper/icons_helper.dart';
+import 'package:loading_indicator/loading_indicator.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
@@ -36,7 +37,7 @@ class _LandingScreenState extends State<LandingScreen> {
       isFileExist = false;
   final Firestore _database = Firestore.instance;
   http.Client httpClient = http.Client();
-  bool fetching = true;
+  bool fetching = false;
   QuerySnapshot messages;
 //  StorageFileDownloadTask _task;
 //  final FirebaseStorage _storage =
@@ -64,6 +65,20 @@ class _LandingScreenState extends State<LandingScreen> {
           child: SafeArea(
             child: ModalProgressHUD(
               inAsyncCall: fetching,
+              progressIndicator: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  LoadingIndicator(
+                    indicatorType: Indicator.orbit,
+                    color: secondaryColor,
+                  ),
+                  Text(
+                    'Downloading Data...',
+                    style: font.copyWith(color: secondaryColor, fontSize: 28),
+                  )
+                ],
+              ),
               child: ListView(
                 children: <Widget>[
                   Center(
@@ -153,19 +168,13 @@ class _LandingScreenState extends State<LandingScreen> {
   initJobs() async {
     String isDone = await SharedPrefUtils.readPrefStr('isSignUpDone');
     String isCloud = await SharedPrefUtils.readPrefStr('isFirstTimeCloud');
-    print(EncryptData.encrypt_file(
-        '/data/user/0/com.hoseakalayil.whoami/app_flutter/images (4).jpeg'));
-    print(EncryptData.decrypt_file(
-        '/data/user/0/com.hoseakalayil.whoami/app_flutter/images (4).jpeg.aes'));
 
     if (isDone == 'yes' && isCloud == 'yes') {
-      print('something');
       setState(() {
         useCloud = true;
       });
       await dataFromCloud();
     } else {
-      print('something');
       setState(() {
         useCloud = false;
       });
@@ -176,7 +185,12 @@ class _LandingScreenState extends State<LandingScreen> {
   }
 
   dataFromCloud() async {
+    doToast('Data downloading from cloud. Please wait');
+    setState(() {
+      fetching = true;
+    });
     String uid = await SharedPrefUtils.readPrefStr('uid');
+
     Map details;
     var x = await _database.collection('user details').getDocuments();
     for (var a in x.documents) {
@@ -189,9 +203,11 @@ class _LandingScreenState extends State<LandingScreen> {
     String tempName = details['name'];
     String tempJob = details['job'];
     List ts = details['social'];
-    List<String> tempSocial = [];
+    List<String> tempSocial = [], tempSocialTitles = [];
     if (ts != null) {
       for (int i = 0; i < ts.length; i++) tempSocial.add(ts[i]);
+      List tst = details['socialTitles'];
+      for (int i = 0; i < tst.length; i++) tempSocialTitles.add(tst[i]);
     }
 
     List tt = details['titles'];
@@ -204,14 +220,12 @@ class _LandingScreenState extends State<LandingScreen> {
     List<String> tempLinks = [];
     if (tl != null) {
       for (int i = 0; i < tl.length; i++) tempLinks.add(tl[i]);
-      print(tempLinks);
     }
 
     List tf = details['filenames'];
     List<String> tempFilenames = [];
     if (tf != null) {
       for (int i = 0; i < tf.length; i++) tempFilenames.add(tf[i]);
-      print(tempFilenames);
     }
 
     List<File> tempRealFiles = [];
@@ -226,17 +240,17 @@ class _LandingScreenState extends State<LandingScreen> {
         await file.writeAsBytes(bytes);
         tempRealFiles.add(file);
       }
-      print(tempRealFiles);
 
       if (tempRealFiles.length != tempTitles.length) {
-        tempProfile = tempRealFiles[0].path;
+        tempProfile = EncryptData.decrypt_file(tempRealFiles[0].path, key: uid);
         for (int i = 1; i < tempRealFiles.length; i++)
-          tempFiles.add(EncryptData.decrypt_file(tempRealFiles[i].path));
+          tempFiles
+              .add(EncryptData.decrypt_file(tempRealFiles[i].path, key: uid));
       } else {
         for (int i = 0; i < tempRealFiles.length; i++)
-          tempFiles.add(EncryptData.decrypt_file(tempRealFiles[i].path));
+          tempFiles
+              .add(EncryptData.decrypt_file(tempRealFiles[i].path, key: uid));
       }
-      print(tempFiles);
     }
 
     //*****************SETSTATE****************************
@@ -262,10 +276,10 @@ class _LandingScreenState extends State<LandingScreen> {
     }
 
     if (tempSocial != null && tempSocial.isNotEmpty) {
-      print('WTFFFFFFFFFF $tempSocial');
       setState(() {
         isSocialExist = true;
         socialMediaUrl = tempSocial;
+        socialMediaTitles = tempSocialTitles;
       });
     }
 
@@ -279,16 +293,6 @@ class _LandingScreenState extends State<LandingScreen> {
     setState(() {
       fetching = false;
     });
-    print('as${profileImage}asa');
-    print(userName);
-    print(jobTitle);
-    print(socialMediaUrl);
-    print(titles);
-    print(files);
-    print(isImageExist);
-    print(isJobExist);
-    print(isSocialExist);
-    print(isFileExist);
 
     isImageExist
         ? await SharedPrefUtils.saveStr('profileImage', profileImage)
@@ -304,6 +308,10 @@ class _LandingScreenState extends State<LandingScreen> {
         ? await SharedPrefUtils.saveStrList('socialLinks', socialMediaUrl)
         : await SharedPrefUtils.saveStrList('socialLinks', [def]);
 
+    isSocialExist
+        ? await SharedPrefUtils.saveStrList('socialTitles', socialMediaTitles)
+        : await SharedPrefUtils.saveStrList('socialTitles', [def]);
+
     isFileExist
         ? await SharedPrefUtils.saveStrList('titles', titles)
         : await SharedPrefUtils.saveStrList('titles', [def]);
@@ -316,6 +324,9 @@ class _LandingScreenState extends State<LandingScreen> {
   }
 
   dataFromSharedPrefs() async {
+    setState(() {
+      fetching = true;
+    });
     String tempProfileImage = await SharedPrefUtils.readPrefStr('profileImage');
     setState(() {
       profileImage = tempProfileImage;
@@ -354,8 +365,6 @@ class _LandingScreenState extends State<LandingScreen> {
 
     titles = await SharedPrefUtils.readPrefStrList('titles');
     files = await SharedPrefUtils.readPrefStrList('files');
-    File file = File(EncryptData.decrypt_file(files[0]));
-    print(file);
     if (titles.elementAt(0) != def || files.elementAt(0) != def)
       setState(() {
         isFileExist = true;
@@ -406,17 +415,31 @@ class _LandingScreenState extends State<LandingScreen> {
 
   IconData findSocialIcon(String media) {
     IconData ico;
+    //GMAIL Checking
     if (media == 'gmail') {
       ico = Icons.mail_outline;
-    } else if (media == 'tiktok') {
+    }
+
+    //TIKTOK Checking
+    else if (media == 'tiktok') {
       ico = MyFlutterApp.tiktok;
-    } else if (getFontAwesomeIcon(
-            name: media.substring(0, 1).toLowerCase() + media.substring(1)) ==
-        null) {
-      ico = FontAwesomeIcons.questionCircle;
-    } else {
-      ico = getFontAwesomeIcon(
-          name: media.substring(0, 1).toLowerCase() + media.substring(1));
+    }
+
+    //ALL OTHER MEDIAS
+    else {
+      String tempMedia = media.toLowerCase();
+      //CHECK USER INPUT
+      if (media.contains('.')) {
+        tempMedia = media.split('.')[0].toLowerCase();
+      }
+
+      //CHECK IF ICON EXIST IN FA
+
+      if (getFontAwesomeIcon(name: tempMedia) == null) {
+        ico = FontAwesomeIcons.questionCircle;
+      } else {
+        ico = getFontAwesomeIcon(name: tempMedia);
+      }
     }
     return ico;
   }

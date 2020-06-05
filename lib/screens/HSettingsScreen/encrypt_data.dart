@@ -1,10 +1,11 @@
 import 'package:aes_crypt/aes_crypt.dart';
+import 'package:whoami/global.dart';
 
 class EncryptData {
   static String encrypt_file(String path) {
     AesCrypt crypt = AesCrypt();
     crypt.setOverwriteMode(AesCryptOwMode.on);
-    crypt.setPassword('my cool password');
+    crypt.setPassword(uid);
     String encFilepath;
     try {
       encFilepath = crypt.encryptFileSync(path);
@@ -16,10 +17,10 @@ class EncryptData {
     return encFilepath;
   }
 
-  static String decrypt_file(String path) {
+  static String decrypt_file(String path, {String key}) {
     AesCrypt crypt = AesCrypt();
     crypt.setOverwriteMode(AesCryptOwMode.on);
-    crypt.setPassword('my cool password');
+    crypt.setPassword(key);
     String decFilepath;
     print(path);
     try {

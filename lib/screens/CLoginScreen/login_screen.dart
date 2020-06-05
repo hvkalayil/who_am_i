@@ -174,7 +174,8 @@ class _LoginScreenState extends State<LoginScreen> {
               context, LandingScreen.id, (Route<dynamic> route) => false);
         }
       } catch (e) {
-        doToast(e.toString(), bg: primaryColor, txt: secondaryColor);
+        doToast(e.toString().split(',')[1],
+            bg: primaryColor, txt: secondaryColor);
       }
     }
   }

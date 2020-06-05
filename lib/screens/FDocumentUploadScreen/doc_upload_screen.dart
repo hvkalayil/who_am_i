@@ -287,7 +287,9 @@ class _CreateAlertDialogState extends State<CreateAlertDialog> {
 
   void addCamDocs(BuildContext context) async {
     ImagePicker picker = new ImagePicker();
-    File tempFile = (await picker.getImage(source: ImageSource.camera)) as File;
+    PickedFile pickedTempFile =
+        await picker.getImage(source: ImageSource.camera);
+    File tempFile = File(pickedTempFile.path);
     var filename = basename(tempFile.path);
     file = await tempFile.copy('$path/$filename');
     if (file != null) {

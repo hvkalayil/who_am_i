@@ -29,7 +29,7 @@ class _UploadDataCardState extends State<UploadDataCard> {
   List<String> downloadUrl = [];
 
   String imgPath;
-  List<String> socialList = [];
+  List<String> socialList = [], socialTitleList = [];
   List<String> titles = [];
   List<String> filesList = [];
 
@@ -53,12 +53,15 @@ class _UploadDataCardState extends State<UploadDataCard> {
 
     List<String> tempSocial =
         await SharedPrefUtils.readPrefStrList('socialLinks');
-    if (tempSocial[0] == def) {
+    if (tempSocial[0] == def || tempSocial == null) {
     } else {
+      List<String> tempSocialTitles =
+          await SharedPrefUtils.readPrefStrList('socialTitles');
       setState(() {
         social = true;
         isSocial = true;
         socialList = tempSocial;
+        socialTitleList = tempSocialTitles;
       });
     }
 
@@ -203,14 +206,16 @@ class _UploadDataCardState extends State<UploadDataCard> {
                         //PROFILE IMAGE
                         if (profile) {
                           if (imgPath != def) {
-                            File file = File(imgPath);
+                            File file = File(EncryptData.encrypt_file(imgPath));
+                            String bName = basename(file.path);
                             setState(() {
                               _task = _storage
                                   .ref()
-                                  .child('user/' + global.uid + '/' + imgPath)
+                                  .child(
+                                      'user/' + global.uid + '/images/' + bName)
                                   .putFile(file);
                             });
-                            fileNames.add(basename(file.path));
+                            fileNames.add(bName);
                             StorageTaskSnapshot takeSnapshot =
                                 await _task.onComplete;
                             String url =
@@ -233,6 +238,7 @@ class _UploadDataCardState extends State<UploadDataCard> {
                         //SOCIAL LINKS
                         if (social) {
                           details.addAll({'social': socialList});
+                          details.addAll({'socialTitles': socialTitleList});
                         }
 
                         //FILES AND TITLES
@@ -315,9 +321,7 @@ class _UploadDataCardState extends State<UploadDataCard> {
                 color: secondaryColor.withOpacity(0.5), fontSize: 20),
           ),
           _task != null
-              ? AnimatedContainer(
-                  duration: Duration(milliseconds: 500),
-                  transform: Matrix4.translationValues(progress, 0, 0),
+              ? Container(
                   width: 200,
                   child: StreamBuilder<StorageTaskEvent>(
                     stream: _task.events,

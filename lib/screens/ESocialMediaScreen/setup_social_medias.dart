@@ -246,8 +246,11 @@ class _SetupSocialMediasState extends State<SetupSocialMedias> {
         onTap: () async {
           setState(() {
             socialMediaUrls.removeAt(i);
+            socialMediaTitles.removeAt(i);
             if (socialMediaUrls.isEmpty) isSocialExist = false;
           });
+          await SharedPrefUtils.saveStrList('socialTitles', socialMediaTitles);
+          await SharedPrefUtils.saveStrList('socialLinks', socialMediaUrls);
         },
         child: Icon(
           Icons.cancel,

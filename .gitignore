@@ -1,6 +1,7 @@
 # KeyStore
 KeyStore/
 key.properties
+Obfuscate/
 # Miscellaneous
 *.class
 *.log

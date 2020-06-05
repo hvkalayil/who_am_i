@@ -227,13 +227,15 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   }
 
   useImagePicker(bool isCamera) async {
+    PickedFile pickedImage;
     File image;
     ImagePicker img = new ImagePicker();
     if (isCamera)
-      image = (await img.getImage(source: ImageSource.camera)) as File;
+      pickedImage = await img.getImage(source: ImageSource.camera);
     else
-      image = (await img.getImage(source: ImageSource.gallery)) as File;
+      pickedImage = await img.getImage(source: ImageSource.gallery);
 
+    image = File(pickedImage.path);
     var filename = basename(image.path);
     image = await image.copy('$path/$filename');
     setState(() {

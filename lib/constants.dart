@@ -48,6 +48,7 @@ class SlideRoute extends PageRouteBuilder {
 }
 
 TextStyle font = TextStyle(fontFamily: 'Quicksand');
+
 var textFieldDecor = InputDecoration(
   labelStyle: TextStyle(color: primaryColor, fontFamily: 'Quicksand'),
   filled: true,
