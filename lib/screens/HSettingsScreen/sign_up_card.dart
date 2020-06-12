@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:whoami/global.dart' as global;
 import 'package:whoami/screens/HSettingsScreen/sign_up_screen.dart';
 import 'package:whoami/service/custom_button.dart';
@@ -15,6 +16,7 @@ class SignUpCard extends StatefulWidget {
 class _SignUpCardState extends State<SignUpCard> {
   String id, pass;
   final _auth = FirebaseAuth.instance;
+  bool pswd = true;
 
   @override
   Widget build(BuildContext context) {
@@ -97,13 +99,24 @@ class _SignUpCardState extends State<SignUpCard> {
                         onChanged: (val) {
                           pass = val;
                         },
-                        obscureText: true,
+                        obscureText: pswd,
                         textInputAction: TextInputAction.go,
                         textCapitalization: TextCapitalization.words,
                         cursorColor: primaryColor,
                         textAlign: TextAlign.center,
                         decoration: textFieldDecor.copyWith(
                           labelText: 'Password',
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              pswd ? FontAwesomeIcons.eyeSlash : FontAwesomeIcons.eye,
+                              color: primaryColor,
+                            ),
+                              onPressed: (){
+                                setState(() {
+                                  pswd = !pswd;
+                                });
+                              },
+                          )
                         )),
                   ),
                 ],
@@ -153,9 +166,19 @@ class _SignUpCardState extends State<SignUpCard> {
                       });
                       return;
                     }
-
+                    bool verificationDone = false;
+                    try{
+                      await result.user.sendEmailVerification();
+                      verificationDone = true;
+                    }catch (e){
+                      doToast(e.toString().split(',')[1],
+                          bg: primaryColor, txt: secondaryColor);
+                      setState(() {
+                        global.isRunning = false;
+                      });
+                    }
                     //User Created
-                    if (result != null) {
+                    if (result != null && verificationDone) {
                       await SharedPrefUtils.saveStr('isSignUpDone', 'yes');
                       setState(() {
                         global.user = result.user;

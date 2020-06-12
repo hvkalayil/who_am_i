@@ -5,6 +5,7 @@ final Color primaryColor = Colors.lightBlueAccent[100];
 final Color secondaryColor = Colors.white;
 const String def = 'Default';
 const String noFormat = 'NOFORMAT';
+const bool useTestId = true;
 
 Map<String, Map<String, String>> medias = {
   'facebook': {'https://www.facebook.com/': '.'},
@@ -79,7 +80,7 @@ void doToast(String message,
   Fluttertoast.showToast(
       msg: message,
       toastLength: Toast.LENGTH_LONG,
-      gravity: ToastGravity.CENTER,
+      gravity: ToastGravity.BOTTOM,
       timeInSecForIosWeb: 1,
       backgroundColor: bg,
       textColor: txt,

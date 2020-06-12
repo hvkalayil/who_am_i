@@ -3,8 +3,10 @@ import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:whoami/screens/CLoginScreen/login_screen.dart';
 import 'package:whoami/screens/DRegisterScreen/registration_screen.dart';
+import 'package:whoami/screens/InfoSliderScreen/info_screen.dart';
 import 'package:whoami/service/my_flutter_app_icons.dart';
 
 import '../../constants.dart';
@@ -44,28 +46,46 @@ class _LoginRegisterScreenState extends State<LoginRegisterScreen> {
         return x;
       },
       child: Scaffold(
-        backgroundColor: primaryColor,
+        backgroundColor: Color(0xff6CD2FF),
         body: AnnotatedRegion<SystemUiOverlayStyle>(
-          value: SystemUiOverlayStyle(statusBarColor: primaryColor),
+          value: SystemUiOverlayStyle(statusBarColor: Color(0xff6CD2FF)),
           child: SafeArea(
-            child: ListView(
-              children: [
-                SizedBox(
-                  height: 10,
+            child: Container(
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage("assets/bg.png"),
+                  fit: BoxFit.fitWidth,
                 ),
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.max,
-                  children: <Widget>[
-                    Image.asset('assets/bg.png'),
-                    buildAnimatedContainer(context, 'Use an existing\nProfile',
-                        MyFlutterApp.icon, moveCardTop),
-                    buildAnimatedContainer(context, 'Create a new\nProfile',
-                        MyFlutterApp.icon2, moveCardBottom),
-                  ],
-                ),
-              ],
+              ),
+              child:
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.max,
+                    children: <Widget>[
+                      buildAnimatedContainer(context, 'Use an existing\nProfile',
+                          MyFlutterApp.icon, moveCardTop),
+                      buildAnimatedContainer(context, 'Create a new\nProfile',
+                          MyFlutterApp.icon2, moveCardBottom),
+                      GestureDetector(
+                        onTap: () => Navigator.popAndPushNamed(context, InfoScreen.id),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Text('Show Introduction',style: font.copyWith(color: secondaryColor,fontSize: 20),),
+                            SizedBox(width: 10),
+                            Icon(
+                              FontAwesomeIcons.lightbulb,
+                              size: 30,
+                              color: secondaryColor,
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: 20),
+                    ],
+                  ),
             ),
           ),
         ),
@@ -76,10 +96,11 @@ class _LoginRegisterScreenState extends State<LoginRegisterScreen> {
   AnimatedContainer buildAnimatedContainer(
       BuildContext context, String text, IconData ico, double movement) {
     return AnimatedContainer(
-      duration: Duration(milliseconds: 1000),
+      curve: Curves.fastLinearToSlowEaseIn,
+      duration: Duration(milliseconds: 600),
       transform: Matrix4.translationValues(movement, 0, 0),
       padding: EdgeInsets.all(20),
-      margin: EdgeInsets.all(20),
+      margin: EdgeInsets.all(10),
       decoration: BoxDecoration(
         color: secondaryColor,
         borderRadius: BorderRadius.all(Radius.circular(20)),

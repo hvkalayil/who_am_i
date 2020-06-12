@@ -1,3 +1,6 @@
+import 'dart:math';
+
+import 'package:firebase_admob/firebase_admob.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -5,6 +8,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:whoami/screens/BLoginRegisterScreen/login_register_screen.dart';
 import 'package:whoami/screens/DRegisterScreen/registration_screen.dart';
+import 'package:whoami/service/ads.dart';
 import 'package:whoami/service/shared_prefs_util.dart';
 
 import '../../constants.dart';
@@ -17,12 +21,50 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
+
+  InterstitialAd myInterstitial;
+
+  InterstitialAd buildInterstitialAd() {
+    String myAdId = 'ca-app-pub-6276155927126955/1551459743';
+    return InterstitialAd(
+      adUnitId: useTestId ? InterstitialAd.testAdUnitId : myAdId,
+      listener: (MobileAdEvent event) {
+        if (event == MobileAdEvent.failedToLoad) {
+          myInterstitial..load();
+        } else if (event == MobileAdEvent.closed) {
+          myInterstitial = buildInterstitialAd()..load();
+        }
+        print(event);
+      },
+    );
+  }
+
+  void showInterstitialAd() {
+    myInterstitial..show();
+  }
+
+  void showRandomInterstitialAd() {
+    Random r = new Random();
+    bool value = r.nextBool();
+
+    if (value == true) {
+      myInterstitial..show();
+    }
+  }
+
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     initJobs();
+    myInterstitial = buildInterstitialAd()..load();
   }
+
+  @override
+  void dispose() {
+    myInterstitial.dispose();
+    super.dispose();
+  }
+
 
   bool isSignUpDone = false;
   bool confirm;
@@ -56,6 +98,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         value: SystemUiOverlayStyle(statusBarColor: primaryColor),
         child: SafeArea(
           child: ListView(
+            shrinkWrap: true,
             padding: EdgeInsets.all(20),
             children: <Widget>[
               makeOptions(
@@ -92,6 +135,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   : SizedBox(
                       width: 0,
                     ),
+              SizedBox(height: 150),
+             BannerAdPage()
             ],
           ),
         ),
@@ -102,6 +147,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   makeOptions({BuildContext context, IconData ico, String txt}) {
     return FlatButton(
       onPressed: () async {
+        showRandomInterstitialAd();
         if (txt == 'Edit Details')
           Navigator.popAndPushNamed(context, RegistrationScreen.id);
         else if (txt == 'Upload to cloud') {
@@ -175,6 +221,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ],
                   ));
         }
+
       },
       child: ListTile(
         leading: Icon(

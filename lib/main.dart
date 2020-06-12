@@ -8,6 +8,7 @@ import 'package:whoami/screens/FDocumentUploadScreen/doc_upload_screen.dart';
 import 'package:whoami/screens/GHomeScreen/landing_screen.dart';
 import 'package:whoami/screens/HSettingsScreen/settings_screen.dart';
 import 'package:whoami/screens/HSettingsScreen/sign_up_screen.dart';
+import 'package:whoami/screens/InfoSliderScreen/info_screen.dart';
 
 void main() => runApp(MyApp());
 
@@ -22,6 +23,7 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       routes: {
         InitialScreen.id: (context) => InitialScreen(),
+        InfoScreen.id: (context) => InfoScreen(),
         SignUpScreen.id: (context) => SignUpScreen(),
         LoginRegisterScreen.id: (context) => LoginRegisterScreen(),
         LoginScreen.id: (context) => LoginScreen(),

@@ -6,6 +6,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
@@ -24,15 +25,15 @@ class RegistrationScreen extends StatefulWidget {
 class _RegistrationScreenState extends State<RegistrationScreen> {
   File _image;
   String path, userName, jobTitle;
-  double nxtBtn = 500;
+  double moveCard = 500;
 
   @override
   void initState() {
     initjobs();
     super.initState();
-    Timer(Duration(milliseconds: 100), () {
+    Timer(Duration(milliseconds: 500), () {
       setState(() {
-        nxtBtn = 0;
+        moveCard = 0;
       });
     });
   }
@@ -40,70 +41,75 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: secondaryColor,
+      backgroundColor: primaryColor,
       body: AnnotatedRegion<SystemUiOverlayStyle>(
         value: SystemUiOverlayStyle(statusBarColor: primaryColor),
         child: SafeArea(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget>[
-              Flexible(
-                flex: 4,
-                fit: FlexFit.tight,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: primaryColor,
-                    borderRadius: BorderRadius.only(
-                        bottomLeft: Radius.circular(30),
-                        bottomRight: Radius.circular(30)),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      GestureDetector(
-                        child: Icon(
-                          Icons.camera,
-                          size: 40,
-                          color: secondaryColor,
-                        ),
-                        onTap: () {
-                          useImagePicker(true);
-                        },
-                      ),
-                      SizedBox(
-                        width: 20,
-                      ),
-                      CircleAvatar(
-                        backgroundColor: secondaryColor,
-                        radius: 100,
-                        child: _image == null ? getDefaultIcon() : getImage(),
-                      ),
-                      SizedBox(
-                        width: 20,
-                      ),
-                      GestureDetector(
-                        onTap: () {
-                          useImagePicker(false);
-                        },
-                        child: Icon(
-                          Icons.image,
-                          size: 40,
-                          color: secondaryColor,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              Flexible(
-                flex: 6,
-                fit: FlexFit.loose,
-                child: Container(
+          child: Center(
+            child: SingleChildScrollView(
+              child: AnimatedContainer(
+                duration: Duration(milliseconds: 1000),
+                curve: Curves.bounceIn,
+                transform: Matrix4.translationValues(moveCard, 0, 0),
+                margin: EdgeInsets.all(20),
+                padding: EdgeInsets.all(20),
+                decoration: BoxDecoration(
                   color: secondaryColor,
-                  child: Padding(
-                    padding:
-                        const EdgeInsets.only(top: 40, left: 20, right: 20),
-                    child: Column(
+                      borderRadius: BorderRadius.all(Radius.circular(20))
+                ),
+                child: Column(
+                  children: <Widget>[
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        GestureDetector(
+                          onTap: () => Navigator.pop(context),
+                          child: Icon(FontAwesomeIcons.arrowLeft,color: primaryColor,size: 30,),
+                        ),
+                        SizedBox(width: 80),
+                        Text('Register',style: font.copyWith(color: primaryColor,fontSize: 24),)
+                      ],
+                    ),
+                    SizedBox(height: 20),
+                    Container(
+                      padding: EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: primaryColor,
+                        borderRadius: BorderRadius.all(Radius.circular(20)),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: <Widget>[
+                          GestureDetector(
+                            child: Icon(
+                              Icons.camera,
+                              size: 40,
+                              color: secondaryColor,
+                            ),
+                            onTap: () {
+                              useImagePicker(true);
+                            },
+                          ),
+                          CircleAvatar(
+                            backgroundColor: secondaryColor,
+                            radius: 80,
+                            child: _image == null ? getDefaultIcon() : getImage(),
+                          ),
+                          GestureDetector(
+                            onTap: () {
+                              useImagePicker(false);
+                            },
+                            child: Icon(
+                              Icons.image,
+                              size: 40,
+                              color: secondaryColor,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: 20),
+                    Column(
                       children: <Widget>[
                         Material(
                           elevation: 5,
@@ -126,9 +132,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                               decoration:
                                   textFieldDecor.copyWith(labelText: 'Name')),
                         ),
-                        SizedBox(
-                          height: 20,
-                        ),
+                        SizedBox(height: 20),
                         Material(
                           elevation: 5,
                           shadowColor: Colors.black,
@@ -149,38 +153,26 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                                   hintText:
                                       'eg. Associate Manager,Home maker,etc.')),
                         ),
+                        SizedBox(height: 20),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: <Widget>[
+                            CustomButton(
+                              borderRadius: BorderRadius.all(Radius.circular(20)),
+                              buttonPadding: EdgeInsets.all(0),
+                              textColor: secondaryColor,
+                              buttonColor: primaryColor,
+                              buttonText: 'NEXT >',
+                              onClick: () => onNextClick(),
+                            )
+                          ],
+                        ),
                       ],
                     ),
-                  ),
+                  ],
                 ),
               ),
-              Flexible(
-                flex: 1,
-                fit: FlexFit.loose,
-                child: AnimatedContainer(
-                  duration: Duration(milliseconds: 500),
-                  transform: Matrix4.translationValues(nxtBtn, 0, 0),
-                  child: Container(
-                    color: secondaryColor,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: <Widget>[
-                        CustomButton(
-                          borderRadius: BorderRadius.only(
-                              topLeft: Radius.circular(20),
-                              bottomLeft: Radius.circular(20)),
-                          buttonPadding: EdgeInsets.all(0),
-                          textColor: secondaryColor,
-                          buttonColor: primaryColor,
-                          buttonText: 'NEXT >',
-                          onClick: () => onNextClick(),
-                        )
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       ),

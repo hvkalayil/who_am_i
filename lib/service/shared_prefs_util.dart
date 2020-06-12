@@ -1,5 +1,20 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
+/*
+socialLinks,
+files,
+profileImage,
+userName,
+socialTitles,
+jobTitle,
+titles
+
+isLogRegDone,
+isSignUpDone, isFirstTimeCloud,   showSlides,
+     uid,
+
+ */
+
 class SharedPrefUtils {
   static clearAll() async {
     final SharedPreferences pref = await SharedPreferences.getInstance();
@@ -26,8 +41,4 @@ class SharedPrefUtils {
     return pref.getStringList(key);
   }
 
-  static getPrefKeys() async {
-    final SharedPreferences pref = await SharedPreferences.getInstance();
-    return pref.getKeys();
-  }
 }

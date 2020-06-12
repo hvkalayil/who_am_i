@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:loading_indicator/loading_indicator.dart';
 import 'package:whoami/screens/BLoginRegisterScreen/login_register_screen.dart';
 import 'package:whoami/screens/GHomeScreen/landing_screen.dart';
+import 'package:whoami/screens/InfoSliderScreen/info_screen.dart';
 import 'package:whoami/service/shared_prefs_util.dart';
 
 import '../../constants.dart';
@@ -21,23 +22,31 @@ class _InitialScreenState extends State<InitialScreen> {
   double moveImg = 500;
 
   initJobs() async {
-    Timer(Duration(milliseconds: 500), () {
+    Timer(Duration(seconds: 1), () {
       setState(() {
         moveImg = 0;
       });
     });
-    Timer(Duration(seconds: 2), () {
-      if (isDone)
-        Navigator.popAndPushNamed(context, LandingScreen.id);
-      else
-        Navigator.popAndPushNamed(context, LoginRegisterScreen.id);
-    });
+    var slides = await SharedPrefUtils.readPrefStr('showSlides') ?? 'yes';
+    if (slides == 'yes') {
+      Timer(Duration(seconds: 1),() {
+        Navigator.popAndPushNamed(context, InfoScreen.id);
+      });
+    }
+    else {
+      Timer(Duration(seconds: 2), () {
+        if (isDone)
+          Navigator.popAndPushNamed(context, LandingScreen.id);
+        else
+          Navigator.popAndPushNamed(context, LoginRegisterScreen.id);
+      });
 
-    String temp = await SharedPrefUtils.readPrefStr('isLogRegDone');
-    if (temp == 'yes')
-      isDone = true;
-    else
-      isDone = false;
+      String temp = await SharedPrefUtils.readPrefStr('isLogRegDone');
+      if (temp == 'yes')
+        isDone = true;
+      else
+        isDone = false;
+    }
   }
 
   @override
@@ -57,6 +66,7 @@ class _InitialScreenState extends State<InitialScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               AnimatedContainer(
+                curve: Curves.bounceIn,
                 duration: Duration(milliseconds: 500),
                 transform: Matrix4.translationValues(moveImg, 0, 0),
                 decoration: BoxDecoration(

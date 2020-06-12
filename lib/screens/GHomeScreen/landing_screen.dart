@@ -39,6 +39,8 @@ class _LandingScreenState extends State<LandingScreen> {
   http.Client httpClient = http.Client();
   bool fetching = false;
   QuerySnapshot messages;
+
+  bool connectionState = true;
 //  StorageFileDownloadTask _task;
 //  final FirebaseStorage _storage =
 //      FirebaseStorage(storageBucket: 'gs://who-am-i-d8752.appspot.com');
@@ -65,21 +67,27 @@ class _LandingScreenState extends State<LandingScreen> {
           child: SafeArea(
             child: ModalProgressHUD(
               inAsyncCall: fetching,
-              progressIndicator: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  LoadingIndicator(
-                    indicatorType: Indicator.orbit,
-                    color: secondaryColor,
-                  ),
-                  Text(
-                    'Downloading Data...',
-                    style: font.copyWith(color: secondaryColor, fontSize: 28),
-                  )
-                ],
+              progressIndicator: Container(
+                width: double.maxFinite,
+                height: double.maxFinite,
+                color: primaryColor,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    LoadingIndicator(
+                      indicatorType: Indicator.pacman,
+                      color: secondaryColor,
+                    ),
+                    Text(
+                      'Downloading Data...Make sure you have a stable connection.',
+                      textAlign: TextAlign.center,
+                      style: font.copyWith(color: secondaryColor, fontSize: 28),
+                    )
+                  ],
+                ),
               ),
-              child: ListView(
+              child: connectionState ? ListView(
                 children: <Widget>[
                   Center(
                     child: Column(
@@ -157,6 +165,32 @@ class _LandingScreenState extends State<LandingScreen> {
                     ),
                   ),
                 ],
+              ) :
+              Container(
+                padding: EdgeInsets.all(20),
+                margin:  EdgeInsets.symmetric(vertical: 100,horizontal: 20),
+                decoration: BoxDecoration(
+                  color: secondaryColor,
+                  borderRadius: BorderRadius.all(Radius.circular(20))
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Icon(FontAwesomeIcons.exclamationTriangle,size: 40,color: primaryColor,),
+                    SizedBox(height: 10),
+                    Text('You seem to have no network connection.'
+                        ' Please connect to the network to load data for the first time',
+                      textAlign: TextAlign.center,
+                      style: font.copyWith(color: primaryColor,fontSize: 24),
+                    ),
+                    RaisedButton(
+                      color: primaryColor,
+                      onPressed: () => dataFromCloud(),
+                      child: Text('Try Again!',style: font.copyWith(color: secondaryColor,fontSize: 20),),
+                    )
+                  ],
+                ),
               ),
             ),
           ),
@@ -169,17 +203,17 @@ class _LandingScreenState extends State<LandingScreen> {
     String isDone = await SharedPrefUtils.readPrefStr('isSignUpDone');
     String isCloud = await SharedPrefUtils.readPrefStr('isFirstTimeCloud');
 
-    if (isDone == 'yes' && isCloud == 'yes') {
-      setState(() {
-        useCloud = true;
-      });
-      await dataFromCloud();
-    } else {
-      setState(() {
-        useCloud = false;
-      });
-      await dataFromSharedPrefs();
-    }
+      if (isDone == 'yes' && isCloud == 'yes') {
+        setState(() {
+          useCloud = true;
+        });
+        await dataFromCloud();
+      } else {
+        setState(() {
+          useCloud = false;
+        });
+        await dataFromSharedPrefs();
+      }
 
     await SharedPrefUtils.saveStr('isLogRegDone', 'yes');
   }
@@ -190,48 +224,72 @@ class _LandingScreenState extends State<LandingScreen> {
       fetching = true;
     });
     String uid = await SharedPrefUtils.readPrefStr('uid');
-
-    Map details;
-    var x = await _database.collection('user details').getDocuments();
-    for (var a in x.documents) {
-      if (a.documentID == uid) {
-        details = a.data;
-        break;
+    try {
+      Map details;
+      var x = await _database.collection('user details').getDocuments();
+      for (var a in x.documents) {
+        if (a.documentID == uid) {
+          details = a.data;
+          break;
+        }
       }
-    }
 
-    String tempName = details['name'];
-    String tempJob = details['job'];
-    List ts = details['social'];
-    List<String> tempSocial = [], tempSocialTitles = [];
-    if (ts != null) {
-      for (int i = 0; i < ts.length; i++) tempSocial.add(ts[i]);
-      List tst = details['socialTitles'];
-      for (int i = 0; i < tst.length; i++) tempSocialTitles.add(tst[i]);
-    }
 
-    List tt = details['titles'];
-    List<String> tempTitles = [];
-    if (tt != null) {
-      for (int i = 0; i < tt.length; i++) tempTitles.add(tt[i]);
-    }
+      String tempName = details['name'];
+      tempName == null ? tempName = await SharedPrefUtils.readPrefStr('userName') : null;
 
-    List tl = details['links'];
-    List<String> tempLinks = [];
-    if (tl != null) {
-      for (int i = 0; i < tl.length; i++) tempLinks.add(tl[i]);
-    }
 
-    List tf = details['filenames'];
-    List<String> tempFilenames = [];
-    if (tf != null) {
-      for (int i = 0; i < tf.length; i++) tempFilenames.add(tf[i]);
-    }
+      String tempJob = details['job'];
+      tempJob == null ? tempJob = await SharedPrefUtils.readPrefStr('jobTitle') : null;
 
-    List<File> tempRealFiles = [];
-    List<String> tempFiles = [];
-    String tempProfile = '';
-    if (tl != null) {
+      List ts = details['social'];
+      List<String> tempSocial = [];
+      List<String> tempSocialTitles = [];
+      if (ts != null) {
+        for (int i = 0; i < ts.length; i++)
+          tempSocial.add(ts[i]);
+
+        List tst = details['socialTitles'];
+        for (int i = 0; i < tst.length; i++)
+          tempSocialTitles.add(tst[i]);
+      }
+      else{
+        tempSocial = await SharedPrefUtils.readPrefStrList('socialLinks');
+        tempSocialTitles = await SharedPrefUtils.readPrefStrList('socialTitles');
+      }
+
+
+      List tt = details['titles'];
+      List<String> tempTitles = [];
+      String tempProfile = '';
+      List<String> tempFiles = [];
+
+      if (tt != null) {
+        for (int i = 0; i < tt.length; i++)
+          tempTitles.add(tt[i]);
+      }else{
+        tempTitles = await SharedPrefUtils.readPrefStrList('titles');
+      }
+
+      //LINKS - Checking if any files are in cloud at all
+      List tl = details['links'];
+      List<String> tempLinks = [];
+      if (tl != []) {
+        print('$tl asdasdsad');
+        for (int i = 0; i < tl.length; i++)
+          tempLinks.add(tl[i]);
+
+      List tf = details['filenames'];
+      List<String> tempFilenames = [];
+      if (tf != null) {
+        try {
+          for (int i = 0; i < tf.length; i++)
+            tempFilenames.add(tf[i]);
+        }  catch (e) {
+          tempFilenames = [];
+        }
+      }
+      List<File> tempRealFiles = [];
       for (int i = 0; i < tempLinks.length; i++) {
         var request = await httpClient.get(Uri.parse(tempLinks[i]));
         var bytes = request.bodyBytes;
@@ -241,86 +299,114 @@ class _LandingScreenState extends State<LandingScreen> {
         tempRealFiles.add(file);
       }
 
-      if (tempRealFiles.length != tempTitles.length) {
-        tempProfile = EncryptData.decrypt_file(tempRealFiles[0].path, key: uid);
-        for (int i = 1; i < tempRealFiles.length; i++)
-          tempFiles
-              .add(EncryptData.decrypt_file(tempRealFiles[i].path, key: uid));
-      } else {
-        for (int i = 0; i < tempRealFiles.length; i++)
-          tempFiles
-              .add(EncryptData.decrypt_file(tempRealFiles[i].path, key: uid));
+      if(tempTitles != null ){
+        if( tempTitles[0] != def) {
+          if (tempRealFiles.length != tempTitles.length) {
+            tempProfile =
+                EncryptData.decrypt_file(tempRealFiles[0].path, key: uid);
+            for (int i = 1; i < tempRealFiles.length; i++)
+              tempFiles
+                  .add(
+                  EncryptData.decrypt_file(tempRealFiles[i].path, key: uid));
+          } else {
+            tempProfile =
+                await SharedPrefUtils.readPrefStr('profileImage') ?? def;
+            for (int i = 0; i < tempRealFiles.length; i++)
+              tempFiles
+                  .add(
+                  EncryptData.decrypt_file(tempRealFiles[i].path, key: uid));
+          }
+        }
+      }else{
+        tempProfile =
+            EncryptData.decrypt_file(tempRealFiles[0].path, key: uid);
+        tempFiles = await SharedPrefUtils.readPrefStrList('files') ?? [def];
       }
     }
+      else{
+        tempProfile = await SharedPrefUtils.readPrefStr('profileImage');
+        tempFiles = await SharedPrefUtils.readPrefStrList('files');
+        print('sdadsasd');
+      }
 
-    //*****************SETSTATE****************************
-    if (tempProfile != null) {
-      if (tempProfile != '') {
+
+      //*****************SETSTATE****************************
+      if (tempProfile != null) {
+        if (tempProfile != '' && tempProfile != def) {
+          setState(() {
+            isImageExist = true;
+            profileImage = tempProfile;
+          });
+        }
+      }
+      setState(() {
+        userName = tempName;
+      });
+
+      if (tempJob != null) {
+        if (tempJob != '' && tempJob != def) {
+          setState(() {
+            isJobExist = true;
+            jobTitle = tempJob;
+          });
+        }
+      }
+
+      if (tempSocial != null && tempSocial.isNotEmpty && tempSocial[0] != def) {
         setState(() {
-          isImageExist = true;
-          profileImage = tempProfile;
+          isSocialExist = true;
+          socialMediaUrl = tempSocial;
+          socialMediaTitles = tempSocialTitles;
         });
       }
-    }
-    setState(() {
-      userName = tempName;
-    });
 
-    if (tempJob != null) {
-      if (tempJob != '') {
+      if (tempTitles != null && tempTitles.isNotEmpty && tempTitles[0] != def) {
         setState(() {
-          isJobExist = true;
-          jobTitle = tempJob;
+          isFileExist = true;
+          titles = tempTitles;
+          files = tempFiles;
         });
       }
-    }
-
-    if (tempSocial != null && tempSocial.isNotEmpty) {
       setState(() {
-        isSocialExist = true;
-        socialMediaUrl = tempSocial;
-        socialMediaTitles = tempSocialTitles;
+        fetching = false;
+        connectionState = true;
+      });
+
+      isImageExist
+          ? await SharedPrefUtils.saveStr('profileImage', profileImage)
+          : await SharedPrefUtils.saveStr('profileImage', def);
+
+      await SharedPrefUtils.saveStr('userName', userName);
+
+      isJobExist
+          ? await SharedPrefUtils.saveStr('jobTitle', jobTitle)
+          : await SharedPrefUtils.saveStr('jobTitle', def);
+
+      isSocialExist
+          ? await SharedPrefUtils.saveStrList('socialLinks', socialMediaUrl)
+          : await SharedPrefUtils.saveStrList('socialLinks', [def]);
+
+      isSocialExist
+          ? await SharedPrefUtils.saveStrList('socialTitles', socialMediaTitles)
+          : await SharedPrefUtils.saveStrList('socialTitles', [def]);
+
+      isFileExist
+          ? await SharedPrefUtils.saveStrList('titles', titles)
+          : await SharedPrefUtils.saveStrList('titles', [def]);
+
+      isFileExist
+          ? await SharedPrefUtils.saveStrList('files', files)
+          : await SharedPrefUtils.saveStrList('files', [def]);
+
+      await SharedPrefUtils.saveStr('isFirstTimeCloud', 'no');
+    }
+    catch (e){
+      print(e);
+      setState(() {
+        fetching = false;
+        connectionState = false;
       });
     }
-
-    if (tempTitles != null && tempTitles.isNotEmpty) {
-      setState(() {
-        isFileExist = true;
-        titles = tempTitles;
-        files = tempFiles;
-      });
-    }
-    setState(() {
-      fetching = false;
-    });
-
-    isImageExist
-        ? await SharedPrefUtils.saveStr('profileImage', profileImage)
-        : await SharedPrefUtils.saveStr('profileImage', def);
-
-    await SharedPrefUtils.saveStr('userName', userName);
-
-    isJobExist
-        ? await SharedPrefUtils.saveStr('jobTitle', jobTitle)
-        : await SharedPrefUtils.saveStr('jobTitle', def);
-
-    isSocialExist
-        ? await SharedPrefUtils.saveStrList('socialLinks', socialMediaUrl)
-        : await SharedPrefUtils.saveStrList('socialLinks', [def]);
-
-    isSocialExist
-        ? await SharedPrefUtils.saveStrList('socialTitles', socialMediaTitles)
-        : await SharedPrefUtils.saveStrList('socialTitles', [def]);
-
-    isFileExist
-        ? await SharedPrefUtils.saveStrList('titles', titles)
-        : await SharedPrefUtils.saveStrList('titles', [def]);
-
-    isFileExist
-        ? await SharedPrefUtils.saveStrList('files', files)
-        : await SharedPrefUtils.saveStrList('files', [def]);
-
-    await SharedPrefUtils.saveStr('isFirstTimeCloud', 'no');
   }
 
   dataFromSharedPrefs() async {

@@ -289,10 +289,10 @@ class _CreateAlertDialogState extends State<CreateAlertDialog> {
     ImagePicker picker = new ImagePicker();
     PickedFile pickedTempFile =
         await picker.getImage(source: ImageSource.camera);
-    File tempFile = File(pickedTempFile.path);
-    var filename = basename(tempFile.path);
-    file = await tempFile.copy('$path/$filename');
-    if (file != null) {
+    if(pickedTempFile != null) {
+      File tempFile = File(pickedTempFile.path);
+      var filename = basename(tempFile.path);
+      file = await tempFile.copy('$path/$filename');
       setState(() {
         documents.add(file);
         fileAdded++;
@@ -302,27 +302,37 @@ class _CreateAlertDialogState extends State<CreateAlertDialog> {
       for (int i = 0; i < documents.length; i++) {
         tempDoc.add(documents[i].path);
       }
-      SharedPrefUtils.saveStrList('files', tempDoc);
+      await SharedPrefUtils.saveStrList('files', tempDoc);
+      await SharedPrefUtils.saveStrList('titles', titleList);
       Navigator.of(context, rootNavigator: true).pop();
+    }
+    else{
+      titleList.removeLast();
     }
   }
 
   void addDocs(BuildContext context) async {
     File tempFile = await FilePicker.getFile();
-    var filename = basename(tempFile.path);
-    file = await tempFile.copy('$path/$filename');
-    if (file != null) {
+    if(tempFile != null) {
+      var filename = basename(tempFile.path);
+      file = await tempFile.copy('$path/$filename');
       setState(() {
         documents.add(file);
         fileAdded++;
         isFileThere = true;
       });
+
       List<String> tempDoc = [];
       for (int i = 0; i < documents.length; i++) {
         tempDoc.add(documents[i].path);
       }
-      SharedPrefUtils.saveStrList('files', tempDoc);
+
+      await SharedPrefUtils.saveStrList('files', tempDoc);
+      await SharedPrefUtils.saveStrList('titles', titleList);
       Navigator.of(context, rootNavigator: true).pop();
+    }
+    else{
+      titleList.removeLast();
     }
   }
 
@@ -396,7 +406,6 @@ class _CreateAlertDialogState extends State<CreateAlertDialog> {
               setState(() {
                 titleList.add(docTitle);
               });
-              await SharedPrefUtils.saveStrList('titles', titleList);
               addCamDocs(context);
             }
           },
@@ -414,8 +423,7 @@ class _CreateAlertDialogState extends State<CreateAlertDialog> {
               setState(() {
                 titleList.add(docTitle);
               });
-              await SharedPrefUtils.saveStrList('titles', titleList);
-              addDocs(this.context);
+              addDocs(context);
             }
           },
           child: Text('Gallery',

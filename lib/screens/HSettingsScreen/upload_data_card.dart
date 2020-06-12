@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart';
 import 'package:whoami/constants.dart';
@@ -19,6 +20,8 @@ class _UploadDataCardState extends State<UploadDataCard> {
   bool isProfile = false, isSocial = false, isFiles = false;
   double progress = 800;
   bool showBar = false;
+  bool enabled = true;
+  String statusText = 'Files are encrypted before upload 🔐';
 
   StorageUploadTask _task;
   final FirebaseStorage _storage =
@@ -39,6 +42,7 @@ class _UploadDataCardState extends State<UploadDataCard> {
     initJobs();
   }
 
+  bool verDone = false;
   void initJobs() async {
     String tempProfileImage = await SharedPrefUtils.readPrefStr('profileImage');
     setState(() {
@@ -78,12 +82,15 @@ class _UploadDataCardState extends State<UploadDataCard> {
     }
   }
 
+
   @override
   Widget build(BuildContext context) {
     return AnimatedContainer(
+        curve: Curves.fastLinearToSlowEaseIn,
       duration: Duration(milliseconds: 500),
       transform: Matrix4.translationValues(global.options, 0, 0),
-      child: Column(
+      child:
+      Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           Container(
@@ -136,9 +143,11 @@ class _UploadDataCardState extends State<UploadDataCard> {
                         ),
                         value: profile,
                         onChanged: (v) {
-                          setState(() {
-                            profile = v;
-                          });
+                          if(enabled) {
+                            setState(() {
+                              profile = v;
+                            });
+                          }
                         },
                       )
                     : SizedBox(
@@ -150,9 +159,11 @@ class _UploadDataCardState extends State<UploadDataCard> {
                       style: font.copyWith(color: primaryColor, fontSize: 20)),
                   value: name,
                   onChanged: (v) {
-                    setState(() {
-                      name = v;
-                    });
+                    if(enabled) {
+                      setState(() {
+                        name = v;
+                      });
+                    }
                   },
                 ),
                 isSocial
@@ -163,9 +174,11 @@ class _UploadDataCardState extends State<UploadDataCard> {
                                 color: primaryColor, fontSize: 20)),
                         value: social,
                         onChanged: (v) {
-                          setState(() {
-                            social = v;
-                          });
+                          if(enabled) {
+                            setState(() {
+                              social = v;
+                            });
+                          }
                         },
                       )
                     : SizedBox(
@@ -179,9 +192,11 @@ class _UploadDataCardState extends State<UploadDataCard> {
                                 color: primaryColor, fontSize: 20)),
                         value: files,
                         onChanged: (v) {
-                          setState(() {
-                            files = v;
-                          });
+                          if(enabled) {
+                            setState(() {
+                              files = v;
+                            });
+                          }
                         },
                       )
                     : SizedBox(
@@ -193,9 +208,14 @@ class _UploadDataCardState extends State<UploadDataCard> {
                 RaisedButton(
                   padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
                   onPressed: () async {
+                    setState(() {
+                      statusText = 'Validating Internet Connection 📡';
+                      enabled = false;
+                    });
                     bool tempCon = await global.checkConn();
                     if (tempCon) {
                       setState(() {
+                        statusText = 'Starting Encryption  🔐 & upload ⏫';
                         progress = 0;
                         showBar = true;
                         global.isRunning = true;
@@ -272,24 +292,27 @@ class _UploadDataCardState extends State<UploadDataCard> {
                         details.addAll({'links': downloadUrl});
                         details.addAll({'filenames': fileNames});
 
-                        await _database
-                            .collection('user details')
-                            .document(global.uid)
-                            .setData(details);
+                        try {
+                          await _database
+                              .collection('user details')
+                              .document(global.uid)
+                              .updateData(details);
+                        }  catch (e) {
+                          await _database
+                              .collection('user details')
+                              .document(global.uid)
+                              .setData(details);
+                        }
                         await SharedPrefUtils.saveStr(
                             'isFirstTimeCloud', 'yes');
 
                         doToast('Upload completed successfully',
                             bg: primaryColor, txt: secondaryColor);
-
-                        if (_task.isSuccessful ||
-                            _task.isCanceled ||
-                            _task.isComplete) {
-                          setState(() {
-                            progress = 800;
-                            showBar = false;
-                          });
-                        }
+                        setState(() {
+                          statusText = 'Upload Complete 😇';
+                          progress = 800;
+                          showBar = false;
+                        });
                       } catch (e) {
                         print(e);
                         doToast('Oops an error has occured.' + e + 'Try Again',
@@ -300,10 +323,15 @@ class _UploadDataCardState extends State<UploadDataCard> {
                           progress = 800;
                         });
                       }
-                    } else {
+                    }
+                    else {
                       doToast('Please connect to internet and try again',
                           bg: Colors.red.shade400, txt: secondaryColor);
                     }
+
+                    setState(() {
+                      enabled = true;
+                    });
                   },
                   color: primaryColor,
                   textColor: secondaryColor,
@@ -312,16 +340,19 @@ class _UploadDataCardState extends State<UploadDataCard> {
                     style: font.copyWith(fontSize: 24),
                   ),
                 ),
+                Text('Make sure you have verified your email.'
+                    'This will help you reset your password later, if necessary.',
+                    textAlign: TextAlign.center,
+                    style: font.copyWith(color: primaryColor, fontSize: 12)),
               ],
             ),
           ),
           Text(
-            'Files are encrypted before upload 🔐',
+            statusText,
             style: font.copyWith(
-                color: secondaryColor.withOpacity(0.5), fontSize: 20),
+                color: secondaryColor, fontSize: 20),
           ),
-          _task != null
-              ? Container(
+          _task != null ?Container(
                   width: 200,
                   child: StreamBuilder<StorageTaskEvent>(
                     stream: _task.events,
@@ -330,7 +361,8 @@ class _UploadDataCardState extends State<UploadDataCard> {
                       double progressPercent = event != null
                           ? event.bytesTransferred / event.totalByteCount
                           : 0;
-                      return Column(
+                      return _task != null ?
+                      Column(
                         children: <Widget>[
                           _task.isPaused
                               ? FlatButton(
@@ -361,86 +393,19 @@ class _UploadDataCardState extends State<UploadDataCard> {
                                 color: secondaryColor, fontSize: 20),
                           ),
                           Text(
-                            'Uploading...',
+                            progressPercent*100 >= 100 ? 'Completed ✔️':'Uploading...',
                             style: font.copyWith(
                                 color: secondaryColor, fontSize: 20),
                           )
                         ],
-                      );
+                      )
+                      :SizedBox(width: 0);
                     },
                   ),
                 )
               : SizedBox(width: 0)
         ],
-      ),
+      )
     );
-  }
-
-  makeProgressBar() {
-    if (_task == null ||
-        _task.isCanceled ||
-        _task.isComplete ||
-        _task.isSuccessful) {
-      setState(() {
-        showBar = false;
-        progress = 200;
-      });
-    }
-    if (_task != null) {
-      if (_task.isSuccessful || _task.isComplete) {
-        doToast('Upload completed successfully',
-            bg: primaryColor, txt: secondaryColor);
-      } else {
-        return AnimatedContainer(
-          duration: Duration(milliseconds: 500),
-          transform: Matrix4.translationValues(0, 0, progress),
-          width: 200,
-          child: StreamBuilder<StorageTaskEvent>(
-            stream: _task.events,
-            builder: (context, snapshots) {
-              var event = snapshots.data.snapshot;
-              double progressPercent = event != null
-                  ? event.bytesTransferred / event.totalByteCount
-                  : 0;
-              return Column(
-                children: <Widget>[
-                  _task.isPaused
-                      ? FlatButton(
-                          child: Icon(
-                            Icons.play_arrow,
-                            color: secondaryColor,
-                          ),
-                          onPressed: () {
-                            _task.resume();
-                          },
-                        )
-                      : FlatButton(
-                          child: Icon(
-                            Icons.pause,
-                            color: secondaryColor,
-                          ),
-                          onPressed: () {
-                            _task.pause();
-                          },
-                        ),
-                  LinearProgressIndicator(
-                    backgroundColor: secondaryColor,
-                    value: progressPercent,
-                  ),
-                  Text(
-                    '${(progressPercent * 100).toStringAsFixed(0)}%',
-                    style: font.copyWith(color: secondaryColor, fontSize: 20),
-                  ),
-                  Text(
-                    'Uploading...',
-                    style: font.copyWith(color: secondaryColor, fontSize: 20),
-                  )
-                ],
-              );
-            },
-          ),
-        );
-      }
-    }
   }
 }
