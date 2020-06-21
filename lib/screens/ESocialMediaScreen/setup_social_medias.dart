@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:whoami/constants.dart';
+import 'package:whoami/screens/AGOD/app_state.dart';
 import 'package:whoami/screens/ESocialMediaScreen/alert_add_profile.dart';
 import 'package:whoami/screens/FDocumentUploadScreen/doc_upload_screen.dart';
 import 'package:whoami/service/custom_button.dart';
@@ -20,118 +21,120 @@ class _SetupSocialMediasState extends State<SetupSocialMedias> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     initJobs();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: primaryColor,
-      body: AnnotatedRegion<SystemUiOverlayStyle>(
-        value: SystemUiOverlayStyle(statusBarColor: primaryColor),
-        child: SafeArea(
-          child: Column(
-            children: <Widget>[
-              Flexible(
-                flex: 3,
-                fit: FlexFit.loose,
-                child: Container(
-                  color: primaryColor,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      Text(
-                        'Add Social Media Profiles',
-                        textAlign: TextAlign.center,
-                        style: font.copyWith(
-                          fontWeight: FontWeight.w900,
-                          decoration: TextDecoration.underline,
-                          fontSize: 36,
-                          color: secondaryColor,
-                        ),
-                      ),
-                      Text(
-                        'You can skip this step if you want.\n Use Add button below to add.',
-                        textAlign: TextAlign.center,
-                        style: font.copyWith(
-                          fontSize: 18,
-                          color: secondaryColor,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-
-              //****************************************************************
-              //BODY
-
-              Flexible(
-                flex: 5,
-                fit: FlexFit.loose,
-                child: Container(
-                  height: double.maxFinite,
-                  width: double.maxFinite,
-                  margin: EdgeInsets.symmetric(horizontal: 20),
-                  decoration: BoxDecoration(
-                      color: secondaryColor,
-                      borderRadius: BorderRadius.all(Radius.circular(20))),
-                  padding: EdgeInsets.only(top: 25),
-                  child: isSocialExist
-                      ? ListView(children: makeSocialList())
-                      : Center(
-                          child: Text(
-                            'No Profiles Added. Use Add button to add',
-                            textAlign: TextAlign.center,
-                            style: font.copyWith(
-                              fontWeight: FontWeight.w600,
-                              fontSize: 26,
-                              color: primaryColor.withAlpha(120),
-                            ),
+    return LifeCycleManager(
+      id: SetupSocialMedias.id,
+      child: Scaffold(
+        backgroundColor: primaryColor,
+        body: AnnotatedRegion<SystemUiOverlayStyle>(
+          value: SystemUiOverlayStyle(statusBarColor: primaryColor),
+          child: SafeArea(
+            child: Column(
+              children: <Widget>[
+                Flexible(
+                  flex: 3,
+                  fit: FlexFit.loose,
+                  child: Container(
+                    color: primaryColor,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        Text(
+                          'Add Social Media Profiles',
+                          textAlign: TextAlign.center,
+                          style: font.copyWith(
+                            fontWeight: FontWeight.w900,
+                            decoration: TextDecoration.underline,
+                            fontSize: 36,
+                            color: secondaryColor,
                           ),
                         ),
+                        Text(
+                          'You can skip this step if you want.\n Use Add button below to add.',
+                          textAlign: TextAlign.center,
+                          style: font.copyWith(
+                            fontSize: 18,
+                            color: secondaryColor,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
-              ),
-              makeButton(context, 'Add Profile'),
-              SizedBox(
-                height: 20,
-              ),
 
-              //****************************************************************
-              //PREVIOUS AND NEXT BUTTONS
+                //****************************************************************
+                //BODY
 
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  CustomButton(
-                    buttonText: '< PREVIOUS',
-                    onClick: () {
-                      Navigator.pop(context);
-                    },
-                    buttonColor: secondaryColor,
-                    textColor: primaryColor,
-                    buttonPadding: EdgeInsets.zero,
-                    borderRadius: BorderRadius.only(
-                        topRight: Radius.circular(20),
-                        bottomRight: Radius.circular(20)),
+                Flexible(
+                  flex: 5,
+                  fit: FlexFit.loose,
+                  child: Container(
+                    height: double.maxFinite,
+                    width: double.maxFinite,
+                    margin: EdgeInsets.symmetric(horizontal: 20),
+                    decoration: BoxDecoration(
+                        color: secondaryColor,
+                        borderRadius: BorderRadius.all(Radius.circular(20))),
+                    padding: EdgeInsets.only(top: 25),
+                    child: isSocialExist
+                        ? ListView(children: makeSocialList())
+                        : Center(
+                            child: Text(
+                              'No Profiles Added. Use Add button to add',
+                              textAlign: TextAlign.center,
+                              style: font.copyWith(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 26,
+                                color: primaryColor.withAlpha(120),
+                              ),
+                            ),
+                          ),
                   ),
-                  CustomButton(
-                    buttonText: 'NEXT >',
-                    onClick: () {
-                      onNextClick();
-                    },
-                    buttonColor: secondaryColor,
-                    textColor: primaryColor,
-                    buttonPadding: EdgeInsets.zero,
-                    borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(20),
-                        bottomLeft: Radius.circular(20)),
-                  ),
-                ],
-              )
-            ],
+                ),
+                makeButton(context, 'Add Profile'),
+                SizedBox(
+                  height: 20,
+                ),
+
+                //****************************************************************
+                //PREVIOUS AND NEXT BUTTONS
+
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    CustomButton(
+                      buttonText: '< PREVIOUS',
+                      onClick: () {
+                        Navigator.pop(context);
+                      },
+                      buttonColor: secondaryColor,
+                      textColor: primaryColor,
+                      buttonPadding: EdgeInsets.zero,
+                      borderRadius: BorderRadius.only(
+                          topRight: Radius.circular(20),
+                          bottomRight: Radius.circular(20)),
+                    ),
+                    CustomButton(
+                      buttonText: 'NEXT >',
+                      onClick: () {
+                        onNextClick();
+                      },
+                      buttonColor: secondaryColor,
+                      textColor: primaryColor,
+                      buttonPadding: EdgeInsets.zero,
+                      borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(20),
+                          bottomLeft: Radius.circular(20)),
+                    ),
+                  ],
+                )
+              ],
+            ),
           ),
         ),
       ),
@@ -199,8 +202,7 @@ class _SetupSocialMediasState extends State<SetupSocialMedias> {
     }
     await SharedPrefUtils.saveStrList('socialTitles', socialMediaTitles);
     await SharedPrefUtils.saveStrList('socialLinks', socialMediaUrls);
-    Navigator.push(
-        context, SlideRoute(widget: DocUploadScreen(), begin: Offset(1, 0)));
+    Navigator.pushNamed(context, DocUploadScreen.id);
   }
 
   List<ListTile> makeSocialList() {

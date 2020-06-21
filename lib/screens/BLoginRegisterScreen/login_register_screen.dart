@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:whoami/screens/AGOD/app_state.dart';
 import 'package:whoami/screens/CLoginScreen/login_screen.dart';
 import 'package:whoami/screens/DRegisterScreen/registration_screen.dart';
 import 'package:whoami/screens/InfoSliderScreen/info_screen.dart';
@@ -39,53 +40,56 @@ class _LoginRegisterScreenState extends State<LoginRegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
-        bool x =
-            await SystemChannels.platform.invokeMethod('SystemNavigator.pop');
-        return x;
-      },
-      child: Scaffold(
-        backgroundColor: Color(0xff6CD2FF),
-        body: AnnotatedRegion<SystemUiOverlayStyle>(
-          value: SystemUiOverlayStyle(statusBarColor: Color(0xff6CD2FF)),
-          child: SafeArea(
-            child: Container(
-              decoration: BoxDecoration(
-                image: DecorationImage(
-                  image: AssetImage("assets/bg.png"),
-                  fit: BoxFit.fitWidth,
-                ),
-              ),
-              child:
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisSize: MainAxisSize.max,
-                    children: <Widget>[
-                      buildAnimatedContainer(context, 'Use an existing\nProfile',
-                          MyFlutterApp.icon, moveCardTop),
-                      buildAnimatedContainer(context, 'Create a new\nProfile',
-                          MyFlutterApp.icon2, moveCardBottom),
-                      GestureDetector(
-                        onTap: () => Navigator.popAndPushNamed(context, InfoScreen.id),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Text('Show Introduction',style: font.copyWith(color: secondaryColor,fontSize: 20),),
-                            SizedBox(width: 10),
-                            Icon(
-                              FontAwesomeIcons.lightbulb,
-                              size: 30,
-                              color: secondaryColor,
-                            ),
-                          ],
-                        ),
-                      ),
-                      SizedBox(height: 20),
-                    ],
+    return LifeCycleManager(
+      id: LoginRegisterScreen.id,
+      child: WillPopScope(
+        onWillPop: () async {
+          bool x =
+              await SystemChannels.platform.invokeMethod('SystemNavigator.pop');
+          return x;
+        },
+        child: Scaffold(
+          backgroundColor: Color(0xff6CD2FF),
+          body: AnnotatedRegion<SystemUiOverlayStyle>(
+            value: SystemUiOverlayStyle(statusBarColor: Color(0xff6CD2FF)),
+            child: SafeArea(
+              child: Container(
+                decoration: BoxDecoration(
+                  image: DecorationImage(
+                    image: AssetImage("assets/bg.png"),
+                    fit: BoxFit.fitWidth,
                   ),
+                ),
+                child:
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.max,
+                      children: <Widget>[
+                        buildAnimatedContainer(context, 'Use an existing\nProfile',
+                            MyFlutterApp.icon, moveCardTop),
+                        buildAnimatedContainer(context, 'Create a new\nProfile',
+                            MyFlutterApp.icon2, moveCardBottom),
+                        GestureDetector(
+                          onTap: () => Navigator.popAndPushNamed(context, InfoScreen.id),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Text('Show Introduction',style: font.copyWith(color: secondaryColor,fontSize: 20),),
+                              SizedBox(width: 10),
+                              Icon(
+                                FontAwesomeIcons.lightbulb,
+                                size: 30,
+                                color: secondaryColor,
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(height: 20),
+                      ],
+                    ),
+              ),
             ),
           ),
         ),
@@ -108,11 +112,9 @@ class _LoginRegisterScreenState extends State<LoginRegisterScreen> {
       child: GestureDetector(
         onTap: () {
           if (text == 'Create a new\nProfile') {
-            Navigator.push(context,
-                SlideRoute(widget: RegistrationScreen(), begin: Offset(0, -1)));
+            Navigator.pushNamed(context, RegistrationScreen.id);
           } else {
-            Navigator.push(context,
-                SlideRoute(widget: LoginScreen(), begin: Offset(0, -1)));
+            Navigator.pushNamed(context, LoginScreen.id);
           }
         },
         child: Wrap(

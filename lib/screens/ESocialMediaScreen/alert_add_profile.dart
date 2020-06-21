@@ -66,73 +66,75 @@ class _AlertAddProfileState extends State<AlertAddProfile> {
 
       //CONTENT
       contentTextStyle: font.copyWith(color: primaryColor, fontSize: 20),
-      content: profileMode
-          ? Column(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                TextField(
-                  controller: TextEditingController(text: userProfileTitle),
-                  onChanged: (value) {
-                    userProfileTitle = value;
-                  },
-                  decoration:
-                      textFieldDecor.copyWith(labelText: 'Enter the title'),
-                ),
-                SizedBox(height: 10),
-                TextField(
-                  onChanged: (value) {
-                    userProfileLink = value;
-                    try {
-                      setState(() {
-                        userProfileTitle = userProfileLink.split('/')[2];
-                      });
-                    } catch (e) {}
-                  },
-                  decoration:
-                      textFieldDecor.copyWith(labelText: 'Enter the URL'),
-                )
-              ],
+      content: SingleChildScrollView(
+        child: profileMode
+            ? Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            TextField(
+              controller: TextEditingController(text: userProfileTitle),
+              onChanged: (value) {
+                userProfileTitle = value;
+              },
+              decoration:
+              textFieldDecor.copyWith(labelText: 'Enter the title'),
+            ),
+            SizedBox(height: 10),
+            TextField(
+              onChanged: (value) {
+                userProfileLink = value;
+                try {
+                  setState(() {
+                    userProfileTitle = userProfileLink.split('/')[2];
+                  });
+                } catch (e) {}
+              },
+              decoration:
+              textFieldDecor.copyWith(labelText: 'Enter the URL'),
             )
-          : Column(
-              mainAxisSize: MainAxisSize.min,
+          ],
+        )
+            : Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    DropdownButton(
-                      hint: Text(
-                        hintTxt + ' ↓',
-                        style: font.copyWith(color: primaryColor, fontSize: 20),
-                      ),
-                      focusColor: primaryColor,
-                      iconEnabledColor: primaryColor,
-                      icon: Icon(
-                        getFontAwesomeIcon(
-                            name: hintTxt.substring(0, 1).toLowerCase() +
-                                hintTxt.substring(1)),
-                        color: primaryColor,
-                      ),
-                      items: makeIcons(),
-                      onChanged: (val) {
-                        setState(() {
-                          hintTxt = val['text'];
-                          userLink = val['link'];
-                          userFormat = val['format'];
-                        });
-                      },
-                    ),
-                  ],
-                ),
-                SizedBox(height: 10),
-                TextField(
-                  onChanged: (value) {
-                    profile = value;
+                DropdownButton(
+                  hint: Text(
+                    hintTxt + ' ↓',
+                    style: font.copyWith(color: primaryColor, fontSize: 20),
+                  ),
+                  focusColor: primaryColor,
+                  iconEnabledColor: primaryColor,
+                  icon: Icon(
+                    getFontAwesomeIcon(
+                        name: hintTxt.substring(0, 1).toLowerCase() +
+                            hintTxt.substring(1)),
+                    color: primaryColor,
+                  ),
+                  items: makeIcons(),
+                  onChanged: (val) {
+                    setState(() {
+                      hintTxt = val['text'];
+                      userLink = val['link'];
+                      userFormat = val['format'];
+                    });
                   },
-                  decoration:
-                      textFieldDecor.copyWith(labelText: 'Enter $hintTxt id'),
-                )
+                ),
               ],
             ),
+            SizedBox(height: 10),
+            TextField(
+              onChanged: (value) {
+                profile = value;
+              },
+              decoration:
+              textFieldDecor.copyWith(labelText: 'Enter $hintTxt id'),
+            )
+          ],
+        ),
+      ),
 
       //ACTIONS
       actions: <Widget>[
@@ -158,38 +160,55 @@ class _AlertAddProfileState extends State<AlertAddProfile> {
                       return;
                     }
                   }
+                  else if(socialMediaTitle.contains(userProfileTitle)){
+                    if(socialMediaUrls[socialMediaTitle.indexOf(userProfileTitle)] == userProfileLink){
+                      doToast('This profile was already added!');
+                    }
+                  }
+                  else {
+                    setState(() {
+                      socialMediaUrls.add(userProfileLink);
+                      socialMediaTitle.add(userProfileTitle);
+                    });
+                    await SharedPrefUtils.saveStrList(
+                        'socialLinks', socialMediaUrls);
+                    await SharedPrefUtils.saveStrList(
+                        'socialTitles', socialMediaTitle);
+                    Navigator.of(context, rootNavigator: true).pop();
+                  }
+                } else {
+                  doToast('You have to enter full URL for this to work');
+                }
+              }
+            }
+            else {
+              if (profile == '' || profile == null) {
+                doToast('Please enter user name');
+                return;
+              }
+              else {
+                String tempProfile = profile;
+                if (userFormat != noFormat) {
+                  tempProfile.replaceAll(' ', userFormat);
+                }
+                if(socialMediaTitle.contains(hintTxt)){
+                  int index = socialMediaTitle.lastIndexOf(hintTxt);
+                  if(socialMediaUrls[index].contains(tempProfile)){
+                    doToast('This profile was already added!');
+                  }
+                }
+                else {
                   setState(() {
-                    socialMediaUrls.add(userProfileLink);
-                    socialMediaTitle.add(userProfileTitle);
+                    socialMediaUrls.add(userLink + tempProfile);
+                    socialMediaTitle.add(hintTxt);
                   });
+
                   await SharedPrefUtils.saveStrList(
                       'socialLinks', socialMediaUrls);
                   await SharedPrefUtils.saveStrList(
                       'socialTitles', socialMediaTitle);
                   Navigator.of(context, rootNavigator: true).pop();
-                } else {
-                  doToast('You have to enter full URL for this to work');
                 }
-              }
-            } else {
-              if (profile == '' || profile == null) {
-                doToast('Please enter user name');
-                return;
-              } else {
-                String tempProfile = profile;
-                if (userFormat != noFormat) {
-                  tempProfile.replaceAll(' ', userFormat);
-                }
-                setState(() {
-                  socialMediaUrls.add(userLink + tempProfile);
-                  socialMediaTitle.add(hintTxt);
-                });
-
-                await SharedPrefUtils.saveStrList(
-                    'socialLinks', socialMediaUrls);
-                await SharedPrefUtils.saveStrList(
-                    'socialTitles', socialMediaTitle);
-                Navigator.of(context, rootNavigator: true).pop();
               }
             }
           },

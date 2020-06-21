@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:path/path.dart';
 import 'package:whoami/constants.dart';
 import 'package:whoami/global.dart' as global;
+import 'package:whoami/screens/GHomeScreen/landing_screen.dart';
 import 'package:whoami/screens/HSettingsScreen/encrypt_data.dart';
 import 'package:whoami/service/shared_prefs_util.dart';
 
@@ -21,7 +22,8 @@ class _UploadDataCardState extends State<UploadDataCard> {
   double progress = 800;
   bool showBar = false;
   bool enabled = true;
-  String statusText = 'Files are encrypted before upload 🔐';
+  String statusText = 'Files are encrypted before upload 🔐\n'
+      'You will be redirected back to home screen after upload is complete.';
 
   StorageUploadTask _task;
   final FirebaseStorage _storage =
@@ -235,12 +237,12 @@ class _UploadDataCardState extends State<UploadDataCard> {
                                       'user/' + global.uid + '/images/' + bName)
                                   .putFile(file);
                             });
-                            fileNames.add(bName);
                             StorageTaskSnapshot takeSnapshot =
                                 await _task.onComplete;
                             String url =
                                 await takeSnapshot.ref.getDownloadURL();
-                            downloadUrl.add(url);
+                            details.addAll({'profileImageLink':url});
+                            details.addAll({'profileImageName':bName});
                           }
                         }
 
@@ -306,13 +308,15 @@ class _UploadDataCardState extends State<UploadDataCard> {
                         await SharedPrefUtils.saveStr(
                             'isFirstTimeCloud', 'yes');
 
-                        doToast('Upload completed successfully',
+                        doToast('Upload completed successfully.\n',
                             bg: primaryColor, txt: secondaryColor);
                         setState(() {
                           statusText = 'Upload Complete 😇';
                           progress = 800;
                           showBar = false;
                         });
+                        Navigator.pushNamedAndRemoveUntil(
+                            context, LandingScreen.id, (Route<dynamic> route) => false);
                       } catch (e) {
                         print(e);
                         doToast('Oops an error has occured.' + e + 'Try Again',
@@ -349,6 +353,7 @@ class _UploadDataCardState extends State<UploadDataCard> {
           ),
           Text(
             statusText,
+            textAlign: TextAlign.center,
             style: font.copyWith(
                 color: secondaryColor, fontSize: 20),
           ),
@@ -393,9 +398,10 @@ class _UploadDataCardState extends State<UploadDataCard> {
                                 color: secondaryColor, fontSize: 20),
                           ),
                           Text(
-                            progressPercent*100 >= 100 ? 'Completed ✔️':'Uploading...',
+                            progressPercent*100 >= 100 ? 'Redirecting Please Wait ⌛️':'Uploading...',
                             style: font.copyWith(
                                 color: secondaryColor, fontSize: 20),
+                            textAlign: TextAlign.center,
                           )
                         ],
                       )

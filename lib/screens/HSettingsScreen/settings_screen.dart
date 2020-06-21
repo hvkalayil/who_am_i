@@ -6,8 +6,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:whoami/screens/AGOD/app_state.dart';
 import 'package:whoami/screens/BLoginRegisterScreen/login_register_screen.dart';
+import 'package:whoami/screens/CLoginScreen/login_screen.dart';
 import 'package:whoami/screens/DRegisterScreen/registration_screen.dart';
+import 'package:whoami/screens/HSettingsScreen/SavedCards/saved_cards.dart';
 import 'package:whoami/service/ads.dart';
 import 'package:whoami/service/shared_prefs_util.dart';
 
@@ -79,65 +82,85 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: secondaryColor,
-      appBar: AppBar(
-        leading: FlatButton(
-            onPressed: () {
-              Navigator.pop(context);
-            },
-            child: Icon(
-              Icons.arrow_back,
-              color: secondaryColor,
-              size: 40,
-            )),
-        title: Text('Settings', style: font.copyWith(fontSize: 28)),
-        backgroundColor: primaryColor,
-      ),
-      body: AnnotatedRegion<SystemUiOverlayStyle>(
-        value: SystemUiOverlayStyle(statusBarColor: primaryColor),
-        child: SafeArea(
-          child: ListView(
-            shrinkWrap: true,
-            padding: EdgeInsets.all(20),
-            children: <Widget>[
-              makeOptions(
-                  context: context, ico: Icons.edit, txt: 'Edit Details'),
-              makeDivider(),
-              makeOptions(
-                  context: context,
-                  ico: Icons.cloud_upload,
-                  txt: 'Upload to cloud'),
-              makeDivider(),
+    return LifeCycleManager(
+      id: SettingsScreen.id,
+      child: Scaffold(
+        backgroundColor: secondaryColor,
+        appBar: AppBar(
+          leading: FlatButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: Icon(
+                Icons.arrow_back,
+                color: secondaryColor,
+                size: 40,
+              )),
+          title: Text('Settings', style: font.copyWith(fontSize: 28)),
+          backgroundColor: primaryColor,
+        ),
+        body: AnnotatedRegion<SystemUiOverlayStyle>(
+          value: SystemUiOverlayStyle(statusBarColor: primaryColor),
+          child: SafeArea(
+            child: ListView(
+              shrinkWrap: true,
+              padding: EdgeInsets.all(20),
+              children: <Widget>[
+                makeOptions(
+                    context: context, ico: Icons.edit, txt: 'Edit Details'),
+                makeDivider(),
+                makeOptions(
+                    context: context,
+                    ico: Icons.cloud_upload,
+                    txt: 'Upload to cloud'),
+                makeDivider(),
+                makeOptions(
+                    context: context,
+                    ico: FontAwesomeIcons.save,
+                    txt: 'Saved Cards'),
+                makeDivider(),
 //              makeOptions(
 //                  context: context,
 //                  ico: Icons.smoke_free,
 //                  txt: 'Get Ad free version'),
 //              makeDivider(),
-              makeOptions(
-                  context: context, ico: Icons.bug_report, txt: 'Report bug'),
-              makeDivider(),
-              makeOptions(
-                  context: context, ico: Icons.contact_mail, txt: 'Contact me'),
-              makeDivider(),
-              makeOptions(context: context, ico: Icons.info, txt: 'About App'),
-              makeDivider(),
-              isSignUpDone
-                  ? makeOptions(
-                      context: context,
-                      ico: FontAwesomeIcons.powerOff,
-                      txt: 'Log Out')
-                  : SizedBox(
-                      width: 0,
-                    ),
-              isSignUpDone
-                  ? makeDivider()
-                  : SizedBox(
-                      width: 0,
-                    ),
-              SizedBox(height: 150),
-             BannerAdPage()
-            ],
+                makeOptions(
+                    context: context, ico: Icons.bug_report, txt: 'Report bug'),
+                makeDivider(),
+                makeOptions(
+                    context: context, ico: Icons.contact_mail, txt: 'Contact me'),
+                makeDivider(),
+                makeOptions(context: context, ico: Icons.info, txt: 'About App'),
+                makeDivider(),
+                isSignUpDone
+                    ? makeOptions(
+                        context: context,
+                        ico: FontAwesomeIcons.powerOff,
+                        txt: 'Log Out')
+                    : SizedBox(
+                        width: 0,
+                      ),
+                isSignUpDone
+                    ? makeDivider()
+                    : SizedBox(
+                        width: 0,
+                      ),
+                !isSignUpDone
+                    ? makeOptions(
+                    context: context,
+                    ico: FontAwesomeIcons.signInAlt,
+                    txt: 'Log in')
+                    : SizedBox(
+                  width: 0,
+                ),
+                !isSignUpDone
+                    ? makeDivider()
+                    : SizedBox(
+                  width: 0,
+                ),
+               BannerAdPage()
+              ],
+            ),
           ),
         ),
       ),
@@ -148,10 +171,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return FlatButton(
       onPressed: () async {
         showRandomInterstitialAd();
-        if (txt == 'Edit Details')
+        if (txt == 'Log in'){
+          Navigator.pushNamed(context, LoginScreen.id);
+        }
+        else if (txt == 'Edit Details') {
           Navigator.popAndPushNamed(context, RegistrationScreen.id);
+        }
         else if (txt == 'Upload to cloud') {
           Navigator.popAndPushNamed(context, SignUpScreen.id);
+        }
+        else if (txt == 'Saved Cards') {
+          Navigator.pushNamed(context, SavedCards.id);
         }
 
         //Bug Report

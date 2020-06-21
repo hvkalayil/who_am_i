@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:whoami/global.dart' as global;
+import 'package:whoami/screens/AGOD/app_state.dart';
 import 'package:whoami/screens/HSettingsScreen/sign_up_card.dart';
 import 'package:whoami/screens/HSettingsScreen/upload_data_card.dart';
 import 'package:whoami/service/shared_prefs_util.dart';
@@ -45,17 +46,20 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () {
-        return;
-      },
-      child: Scaffold(
-        backgroundColor: primaryColor,
-        body: AnnotatedRegion<SystemUiOverlayStyle>(
-          value: SystemUiOverlayStyle(statusBarColor: primaryColor),
-          child: SafeArea(
-            child: Center(
-              child: !global.isSignDone ? SignUpCard() : UploadDataCard(),
+    return LifeCycleManager(
+      id: SignUpScreen.id,
+      child: WillPopScope(
+        onWillPop: () {
+          return;
+        },
+        child: Scaffold(
+          backgroundColor: primaryColor,
+          body: AnnotatedRegion<SystemUiOverlayStyle>(
+            value: SystemUiOverlayStyle(statusBarColor: primaryColor),
+            child: SafeArea(
+              child: Center(
+                child: !global.isSignDone ? SignUpCard() : UploadDataCard(),
+              ),
             ),
           ),
         ),

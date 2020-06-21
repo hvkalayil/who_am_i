@@ -6,11 +6,13 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:whoami/constants.dart';
+import 'package:whoami/screens/AGOD/app_state.dart';
 import 'package:whoami/screens/ESocialMediaScreen/setup_social_medias.dart';
 import 'package:whoami/service/custom_button.dart';
 import 'package:whoami/service/my_flutter_app_icons.dart';
@@ -40,136 +42,156 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: primaryColor,
-      body: AnnotatedRegion<SystemUiOverlayStyle>(
-        value: SystemUiOverlayStyle(statusBarColor: primaryColor),
-        child: SafeArea(
-          child: Center(
-            child: SingleChildScrollView(
-              child: AnimatedContainer(
-                duration: Duration(milliseconds: 1000),
-                curve: Curves.bounceIn,
-                transform: Matrix4.translationValues(moveCard, 0, 0),
-                margin: EdgeInsets.all(20),
-                padding: EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: secondaryColor,
-                      borderRadius: BorderRadius.all(Radius.circular(20))
-                ),
-                child: Column(
-                  children: <Widget>[
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        GestureDetector(
-                          onTap: () => Navigator.pop(context),
-                          child: Icon(FontAwesomeIcons.arrowLeft,color: primaryColor,size: 30,),
-                        ),
-                        SizedBox(width: 80),
-                        Text('Register',style: font.copyWith(color: primaryColor,fontSize: 24),)
-                      ],
-                    ),
-                    SizedBox(height: 20),
-                    Container(
-                      padding: EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        color: primaryColor,
-                        borderRadius: BorderRadius.all(Radius.circular(20)),
+    return LifeCycleManager(
+      id: RegistrationScreen.id,
+      child: Scaffold(
+        backgroundColor: primaryColor,
+        body: AnnotatedRegion<SystemUiOverlayStyle>(
+          value: SystemUiOverlayStyle(statusBarColor: primaryColor),
+          child: SafeArea(
+            child: Center(
+              child: SingleChildScrollView(
+                child: AnimatedContainer(
+                  duration: Duration(milliseconds: 1000),
+                  curve: Curves.bounceIn,
+                  transform: Matrix4.translationValues(moveCard, 0, 0),
+                  margin: EdgeInsets.all(20),
+                  padding: EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: secondaryColor,
+                        borderRadius: BorderRadius.all(Radius.circular(20))
+                  ),
+                  child: Column(
+                    children: <Widget>[
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          GestureDetector(
+                            onTap: () => Navigator.pop(context),
+                            child: Icon(FontAwesomeIcons.arrowLeft,color: primaryColor,size: 30,),
+                          ),
+                          SizedBox(width: 80),
+                          Text('Register',style: font.copyWith(color: primaryColor,fontSize: 24),)
+                        ],
                       ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      SizedBox(height: 20),
+                      Container(
+                        width: double.maxFinite,
+                        padding: EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          color: primaryColor,
+                          borderRadius: BorderRadius.all(Radius.circular(20)),
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: <Widget>[
+                            CircleAvatar(
+                              backgroundColor: secondaryColor,
+                              radius: 80,
+                              child: _image == null ? getDefaultIcon() : getImage(),
+                            ),
+                            RaisedButton(
+                              onPressed: () => useImagePicker(true),
+                              color: secondaryColor,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.all(Radius.circular(20))
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.camera,
+                                    size: 30,
+                                    color: primaryColor,
+                                  ),
+                                  Text('Use Camera',style: font.copyWith(color: primaryColor),)
+                                ],
+                              ),
+                            ),
+                            RaisedButton(
+                              onPressed: () => useImagePicker(false),
+                              color: secondaryColor,
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.all(Radius.circular(20))
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.image,
+                                    size: 30,
+                                    color: primaryColor,
+                                  ),
+                                  Text('Use Gallery',style: font.copyWith(color: primaryColor),)
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: 20),
+                      Column(
                         children: <Widget>[
-                          GestureDetector(
-                            child: Icon(
-                              Icons.camera,
-                              size: 40,
-                              color: secondaryColor,
+                          Material(
+                            elevation: 5,
+                            shadowColor: Colors.black,
+                            borderRadius: BorderRadius.all(
+                              Radius.circular(40),
                             ),
-                            onTap: () {
-                              useImagePicker(true);
-                            },
+                            child: TextField(
+                                controller: TextEditingController(text: userName),
+                                onChanged: (value) {
+                                  userName = value;
+                                },
+                                onSubmitted: (value) {
+                                  FocusScope.of(context).nextFocus();
+                                },
+                                textInputAction: TextInputAction.next,
+                                textCapitalization: TextCapitalization.words,
+                                cursorColor: primaryColor,
+                                textAlign: TextAlign.center,
+                                decoration:
+                                    textFieldDecor.copyWith(labelText: 'Name')),
                           ),
-                          CircleAvatar(
-                            backgroundColor: secondaryColor,
-                            radius: 80,
-                            child: _image == null ? getDefaultIcon() : getImage(),
-                          ),
-                          GestureDetector(
-                            onTap: () {
-                              useImagePicker(false);
-                            },
-                            child: Icon(
-                              Icons.image,
-                              size: 40,
-                              color: secondaryColor,
+                          SizedBox(height: 20),
+                          Material(
+                            elevation: 5,
+                            shadowColor: Colors.black,
+                            borderRadius: BorderRadius.all(
+                              Radius.circular(40),
                             ),
+                            child: TextField(
+                                controller: TextEditingController(text: jobTitle),
+                                onChanged: (value) {
+                                  jobTitle = value;
+                                },
+                                textInputAction: TextInputAction.go,
+                                textCapitalization: TextCapitalization.words,
+                                cursorColor: primaryColor,
+                                textAlign: TextAlign.center,
+                                decoration: textFieldDecor.copyWith(
+                                    labelText: 'Job Title',
+                                    hintText:
+                                        'eg. Associate Manager,Home maker,etc.')),
+                          ),
+                          SizedBox(height: 20),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: <Widget>[
+                              CustomButton(
+                                borderRadius: BorderRadius.all(Radius.circular(20)),
+                                buttonPadding: EdgeInsets.all(0),
+                                textColor: secondaryColor,
+                                buttonColor: primaryColor,
+                                buttonText: 'NEXT >',
+                                onClick: () => onNextClick(context),
+                              )
+                            ],
                           ),
                         ],
                       ),
-                    ),
-                    SizedBox(height: 20),
-                    Column(
-                      children: <Widget>[
-                        Material(
-                          elevation: 5,
-                          shadowColor: Colors.black,
-                          borderRadius: BorderRadius.all(
-                            Radius.circular(40),
-                          ),
-                          child: TextField(
-                              controller: TextEditingController(text: userName),
-                              onChanged: (value) {
-                                userName = value;
-                              },
-                              onSubmitted: (value) {
-                                FocusScope.of(context).nextFocus();
-                              },
-                              textInputAction: TextInputAction.next,
-                              textCapitalization: TextCapitalization.words,
-                              cursorColor: primaryColor,
-                              textAlign: TextAlign.center,
-                              decoration:
-                                  textFieldDecor.copyWith(labelText: 'Name')),
-                        ),
-                        SizedBox(height: 20),
-                        Material(
-                          elevation: 5,
-                          shadowColor: Colors.black,
-                          borderRadius: BorderRadius.all(
-                            Radius.circular(40),
-                          ),
-                          child: TextField(
-                              controller: TextEditingController(text: jobTitle),
-                              onChanged: (value) {
-                                jobTitle = value;
-                              },
-                              textInputAction: TextInputAction.go,
-                              textCapitalization: TextCapitalization.words,
-                              cursorColor: primaryColor,
-                              textAlign: TextAlign.center,
-                              decoration: textFieldDecor.copyWith(
-                                  labelText: 'Job Title',
-                                  hintText:
-                                      'eg. Associate Manager,Home maker,etc.')),
-                        ),
-                        SizedBox(height: 20),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: <Widget>[
-                            CustomButton(
-                              borderRadius: BorderRadius.all(Radius.circular(20)),
-                              buttonPadding: EdgeInsets.all(0),
-                              textColor: secondaryColor,
-                              buttonColor: primaryColor,
-                              buttonText: 'NEXT >',
-                              onClick: () => onNextClick(),
-                            )
-                          ],
-                        ),
-                      ],
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -229,13 +251,22 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
     image = File(pickedImage.path);
     var filename = basename(image.path);
-    image = await image.copy('$path/$filename');
+    File finalFile = await testCompressAndGetFile(image, '$path/$filename');
     setState(() {
-      _image = image;
+      _image = finalFile;
     });
   }
 
-  onNextClick() async {
+  Future<File> testCompressAndGetFile(File file, String targetPath) async {
+    var result = await FlutterImageCompress.compressAndGetFile(
+      file.absolute.path, targetPath,
+      quality: 80,
+    );
+
+    return result;
+  }
+
+  onNextClick(BuildContext context) async {
     if (userName == null || userName == '') {
       doToast('Please enter your name');
       return null;
@@ -254,7 +285,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     } else {
       SharedPrefUtils.saveStr('jobTitle', jobTitle);
     }
-    Navigator.push(this.context,
-        SlideRoute(widget: SetupSocialMedias(), begin: Offset(1, 0)));
+    Navigator.pushNamed(context, SetupSocialMedias.id);
   }
 }

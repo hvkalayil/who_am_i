@@ -13,6 +13,7 @@ import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:whoami/screens/AGOD/app_state.dart';
 import 'package:whoami/screens/HSettingsScreen/encrypt_data.dart';
 import 'package:whoami/screens/HSettingsScreen/settings_screen.dart';
 import 'package:whoami/service/my_flutter_app_icons.dart';
@@ -22,6 +23,7 @@ import '../../constants.dart';
 
 class LandingScreen extends StatefulWidget {
   static String id = 'LandingScreen';
+
   @override
   _LandingScreenState createState() => _LandingScreenState();
 }
@@ -41,6 +43,7 @@ class _LandingScreenState extends State<LandingScreen> {
   QuerySnapshot messages;
 
   bool connectionState = true;
+
 //  StorageFileDownloadTask _task;
 //  final FirebaseStorage _storage =
 //      FirebaseStorage(storageBucket: 'gs://who-am-i-d8752.appspot.com');
@@ -54,143 +57,160 @@ class _LandingScreenState extends State<LandingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
-        bool x =
-            await SystemChannels.platform.invokeMethod('SystemNavigator.pop');
-        return x;
-      },
-      child: Scaffold(
-        backgroundColor: primaryColor,
-        body: AnnotatedRegion<SystemUiOverlayStyle>(
-          value: SystemUiOverlayStyle(statusBarColor: primaryColor),
-          child: SafeArea(
-            child: ModalProgressHUD(
-              inAsyncCall: fetching,
-              progressIndicator: Container(
-                width: double.maxFinite,
-                height: double.maxFinite,
-                color: primaryColor,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    LoadingIndicator(
-                      indicatorType: Indicator.pacman,
-                      color: secondaryColor,
-                    ),
-                    Text(
-                      'Downloading Data...Make sure you have a stable connection.',
-                      textAlign: TextAlign.center,
-                      style: font.copyWith(color: secondaryColor, fontSize: 28),
-                    )
-                  ],
-                ),
-              ),
-              child: connectionState ? ListView(
-                children: <Widget>[
-                  Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        SizedBox(
-                          height: 50,
-                        ),
-                        CircleAvatar(
-                            radius: 100,
-                            backgroundColor: secondaryColor,
-                            child: isImageExist
-                                ? getProfileIcon()
-                                : getDefaultIcon()),
-                        SizedBox(
-                          height: 10,
-                        ),
-                        Text(userName,
-                            style: font.copyWith(
-                                color: secondaryColor, fontSize: 30)),
-                        Container(
-                          child: isJobExist
-                              ? getJob()
-                              : Container(color: secondaryColor),
-                        ),
-                        SizedBox(
-                          height: 20,
-                        ),
-                        Container(
-                          child: isSocialExist
-                              ? Container(
-                                  padding: EdgeInsets.all(20),
-                                  decoration: BoxDecoration(
-                                      border: Border.all(
-                                          color: secondaryColor, width: 5),
-                                      borderRadius: BorderRadius.all(
-                                          Radius.circular(20))),
-                                  child: Wrap(
-                                    alignment: WrapAlignment.center,
-                                    children: makeSocialList(),
-                                  ),
-                                )
-                              : SizedBox(height: 0),
-                        ),
-                        SizedBox(
-                          height: 20,
-                        ),
-                        Container(
-                          child: isFileExist
-                              ? Container(
-                                  padding: EdgeInsets.all(20),
-                                  decoration: BoxDecoration(
-                                      border: Border.all(
-                                          color: secondaryColor, width: 5),
-                                      borderRadius: BorderRadius.all(
-                                          Radius.circular(20))),
-                                  child: Wrap(
-                                    alignment: WrapAlignment.center,
-                                    children: makeFiles(),
-                                  ))
-                              : SizedBox(height: 0),
-                        ),
-                        FlatButton(
-                          padding: EdgeInsets.all(20),
-                          child: Icon(
-                            Icons.settings,
-                            color: secondaryColor,
-                            size: 40,
-                          ),
-                          onPressed: () {
-                            Navigator.pushNamed(context, SettingsScreen.id);
-                          },
-                        )
-                      ],
-                    ),
+    return LifeCycleManager(
+      id: LandingScreen.id,
+      child: WillPopScope(
+        onWillPop: () async {
+          bool x =
+              await SystemChannels.platform.invokeMethod('SystemNavigator.pop');
+          return x;
+        },
+        child: Scaffold(
+          backgroundColor: primaryColor,
+          body: AnnotatedRegion<SystemUiOverlayStyle>(
+            value: SystemUiOverlayStyle(statusBarColor: primaryColor),
+            child: SafeArea(
+              child: ModalProgressHUD(
+                inAsyncCall: fetching,
+                progressIndicator: Container(
+                  width: double.maxFinite,
+                  height: double.maxFinite,
+                  color: primaryColor,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      LoadingIndicator(
+                        indicatorType: Indicator.pacman,
+                        color: secondaryColor,
+                      ),
+                      Text(
+                        'Downloading Data...Make sure you have a stable connection.',
+                        textAlign: TextAlign.center,
+                        style: font.copyWith(color: secondaryColor, fontSize: 28),
+                      )
+                    ],
                   ),
-                ],
-              ) :
-              Container(
-                padding: EdgeInsets.all(20),
-                margin:  EdgeInsets.symmetric(vertical: 100,horizontal: 20),
-                decoration: BoxDecoration(
-                  color: secondaryColor,
-                  borderRadius: BorderRadius.all(Radius.circular(20))
                 ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Icon(FontAwesomeIcons.exclamationTriangle,size: 40,color: primaryColor,),
-                    SizedBox(height: 10),
-                    Text('You seem to have no network connection.'
-                        ' Please connect to the network to load data for the first time',
-                      textAlign: TextAlign.center,
-                      style: font.copyWith(color: primaryColor,fontSize: 24),
-                    ),
-                    RaisedButton(
-                      color: primaryColor,
-                      onPressed: () => dataFromCloud(),
-                      child: Text('Try Again!',style: font.copyWith(color: secondaryColor,fontSize: 20),),
-                    )
-                  ],
-                ),
+                child: connectionState
+                    ? ListView(
+                        children: <Widget>[
+                          Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: <Widget>[
+                                SizedBox(
+                                  height: 50,
+                                ),
+                                CircleAvatar(
+                                    radius: 100,
+                                    backgroundColor: secondaryColor,
+                                    child: isImageExist
+                                        ? getProfileIcon()
+                                        : getDefaultIcon()),
+                                SizedBox(
+                                  height: 10,
+                                ),
+                                Text(userName,
+                                    style: font.copyWith(
+                                        color: secondaryColor, fontSize: 30)),
+                                Container(
+                                  child: isJobExist
+                                      ? getJob()
+                                      : Container(color: secondaryColor),
+                                ),
+                                SizedBox(
+                                  height: 20,
+                                ),
+                                Container(
+                                  child: isSocialExist
+                                      ? Container(
+                                          padding: EdgeInsets.all(20),
+                                          decoration: BoxDecoration(
+                                              border: Border.all(
+                                                  color: secondaryColor,
+                                                  width: 5),
+                                              borderRadius: BorderRadius.all(
+                                                  Radius.circular(20))),
+                                          child: Wrap(
+                                            alignment: WrapAlignment.center,
+                                            children: makeSocialList(),
+                                          ),
+                                        )
+                                      : SizedBox(height: 0),
+                                ),
+                                SizedBox(
+                                  height: 20,
+                                ),
+                                Container(
+                                  child: isFileExist
+                                      ? Container(
+                                          padding: EdgeInsets.all(20),
+                                          decoration: BoxDecoration(
+                                              border: Border.all(
+                                                  color: secondaryColor,
+                                                  width: 5),
+                                              borderRadius: BorderRadius.all(
+                                                  Radius.circular(20))),
+                                          child: Wrap(
+                                            alignment: WrapAlignment.center,
+                                            children: makeFiles(),
+                                          ))
+                                      : SizedBox(height: 0),
+                                ),
+                                FlatButton(
+                                  padding: EdgeInsets.all(20),
+                                  child: Icon(
+                                    Icons.settings,
+                                    color: secondaryColor,
+                                    size: 40,
+                                  ),
+                                  onPressed: () {
+                                    Navigator.pushNamed(
+                                        context, SettingsScreen.id);
+                                  },
+                                )
+                              ],
+                            ),
+                          ),
+                        ],
+                      )
+                    : Container(
+                        padding: EdgeInsets.all(20),
+                        margin:
+                            EdgeInsets.symmetric(vertical: 100, horizontal: 20),
+                        decoration: BoxDecoration(
+                            color: secondaryColor,
+                            borderRadius: BorderRadius.all(Radius.circular(20))),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Icon(
+                              FontAwesomeIcons.exclamationTriangle,
+                              size: 40,
+                              color: primaryColor,
+                            ),
+                            SizedBox(height: 10),
+                            Text(
+                              'You seem to have no network connection.'
+                              ' Please connect to the network to load data for the first time',
+                              textAlign: TextAlign.center,
+                              style: font.copyWith(
+                                  color: primaryColor, fontSize: 24),
+                            ),
+                            RaisedButton(
+                              color: primaryColor,
+                              onPressed: () => dataFromCloud(),
+                              child: Text(
+                                'Try Again!',
+                                style: font.copyWith(
+                                    color: secondaryColor, fontSize: 20),
+                              ),
+                            )
+                          ],
+                        ),
+                      ),
               ),
             ),
           ),
@@ -203,17 +223,17 @@ class _LandingScreenState extends State<LandingScreen> {
     String isDone = await SharedPrefUtils.readPrefStr('isSignUpDone');
     String isCloud = await SharedPrefUtils.readPrefStr('isFirstTimeCloud');
 
-      if (isDone == 'yes' && isCloud == 'yes') {
-        setState(() {
-          useCloud = true;
-        });
-        await dataFromCloud();
-      } else {
-        setState(() {
-          useCloud = false;
-        });
-        await dataFromSharedPrefs();
-      }
+    if (isDone == 'yes' && isCloud == 'yes') {
+      setState(() {
+        useCloud = true;
+      });
+      await dataFromCloud();
+    } else {
+      setState(() {
+        useCloud = false;
+      });
+      await dataFromSharedPrefs();
+    }
 
     await SharedPrefUtils.saveStr('isLogRegDone', 'yes');
   }
@@ -226,38 +246,35 @@ class _LandingScreenState extends State<LandingScreen> {
     String uid = await SharedPrefUtils.readPrefStr('uid');
     try {
       Map details;
-      var x = await _database.collection('user details').getDocuments();
-      for (var a in x.documents) {
-        if (a.documentID == uid) {
-          details = a.data;
-          break;
-        }
-      }
-
+      await _database
+          .collection('user details')
+          .document(uid)
+          .get()
+          .then((value) => details = value.data);
 
       String tempName = details['name'];
-      tempName == null ? tempName = await SharedPrefUtils.readPrefStr('userName') : null;
-
+      tempName == null
+          ? tempName = await SharedPrefUtils.readPrefStr('userName')
+          : null;
 
       String tempJob = details['job'];
-      tempJob == null ? tempJob = await SharedPrefUtils.readPrefStr('jobTitle') : null;
+      tempJob == null
+          ? tempJob = await SharedPrefUtils.readPrefStr('jobTitle')
+          : null;
 
       List ts = details['social'];
       List<String> tempSocial = [];
       List<String> tempSocialTitles = [];
       if (ts != null) {
-        for (int i = 0; i < ts.length; i++)
-          tempSocial.add(ts[i]);
+        for (int i = 0; i < ts.length; i++) tempSocial.add(ts[i]);
 
         List tst = details['socialTitles'];
-        for (int i = 0; i < tst.length; i++)
-          tempSocialTitles.add(tst[i]);
-      }
-      else{
+        for (int i = 0; i < tst.length; i++) tempSocialTitles.add(tst[i]);
+      } else {
         tempSocial = await SharedPrefUtils.readPrefStrList('socialLinks');
-        tempSocialTitles = await SharedPrefUtils.readPrefStrList('socialTitles');
+        tempSocialTitles =
+            await SharedPrefUtils.readPrefStrList('socialTitles');
       }
-
 
       List tt = details['titles'];
       List<String> tempTitles = [];
@@ -265,10 +282,22 @@ class _LandingScreenState extends State<LandingScreen> {
       List<String> tempFiles = [];
 
       if (tt != null) {
-        for (int i = 0; i < tt.length; i++)
-          tempTitles.add(tt[i]);
-      }else{
+        for (int i = 0; i < tt.length; i++) tempTitles.add(tt[i]);
+      } else {
         tempTitles = await SharedPrefUtils.readPrefStrList('titles');
+      }
+
+      String profileLink = details['profileImageLink'] ?? def;
+      String profileImageName = details['profileImageName'] ?? def;
+      if (profileLink == def) {
+        tempProfile = await SharedPrefUtils.readPrefStr('profileImage') ?? def;
+      } else {
+        var request = await httpClient.get(Uri.parse(profileLink));
+        var bytes = request.bodyBytes;
+        String dir = (await getApplicationDocumentsDirectory()).path;
+        File file = File('$dir/$profileImageName');
+        await file.writeAsBytes(bytes);
+        tempProfile = EncryptData.decrypt_file(file.path, key: uid);
       }
 
       //LINKS - Checking if any files are in cloud at all
@@ -276,59 +305,34 @@ class _LandingScreenState extends State<LandingScreen> {
       List<String> tempLinks = [];
       if (tl != []) {
         print('$tl asdasdsad');
-        for (int i = 0; i < tl.length; i++)
-          tempLinks.add(tl[i]);
+        for (int i = 0; i < tl.length; i++) tempLinks.add(tl[i]);
 
-      List tf = details['filenames'];
-      List<String> tempFilenames = [];
-      if (tf != null) {
-        try {
-          for (int i = 0; i < tf.length; i++)
-            tempFilenames.add(tf[i]);
-        }  catch (e) {
-          tempFilenames = [];
-        }
-      }
-      List<File> tempRealFiles = [];
-      for (int i = 0; i < tempLinks.length; i++) {
-        var request = await httpClient.get(Uri.parse(tempLinks[i]));
-        var bytes = request.bodyBytes;
-        String dir = (await getApplicationDocumentsDirectory()).path;
-        File file = File('$dir/${tempFilenames[i]}');
-        await file.writeAsBytes(bytes);
-        tempRealFiles.add(file);
-      }
-
-      if(tempTitles != null ){
-        if( tempTitles[0] != def) {
-          if (tempRealFiles.length != tempTitles.length) {
-            tempProfile =
-                EncryptData.decrypt_file(tempRealFiles[0].path, key: uid);
-            for (int i = 1; i < tempRealFiles.length; i++)
-              tempFiles
-                  .add(
-                  EncryptData.decrypt_file(tempRealFiles[i].path, key: uid));
-          } else {
-            tempProfile =
-                await SharedPrefUtils.readPrefStr('profileImage') ?? def;
-            for (int i = 0; i < tempRealFiles.length; i++)
-              tempFiles
-                  .add(
-                  EncryptData.decrypt_file(tempRealFiles[i].path, key: uid));
+        List tf = details['filenames'];
+        List<String> tempFilenames = [];
+        if (tf != null) {
+          try {
+            for (int i = 0; i < tf.length; i++) tempFilenames.add(tf[i]);
+          } catch (e) {
+            tempFilenames = [];
           }
         }
-      }else{
-        tempProfile =
-            EncryptData.decrypt_file(tempRealFiles[0].path, key: uid);
-        tempFiles = await SharedPrefUtils.readPrefStrList('files') ?? [def];
-      }
-    }
-      else{
-        tempProfile = await SharedPrefUtils.readPrefStr('profileImage');
+        List<File> tempRealFiles = [];
+        for (int i = 0; i < tempLinks.length; i++) {
+          var request = await httpClient.get(Uri.parse(tempLinks[i]));
+          var bytes = request.bodyBytes;
+          String dir = (await getApplicationDocumentsDirectory()).path;
+          File file = File('$dir/${tempFilenames[i]}');
+          await file.writeAsBytes(bytes);
+          tempRealFiles.add(file);
+        }
+
+        for (int i = 0; i < tempRealFiles.length; i++)
+          tempFiles
+              .add(EncryptData.decrypt_file(tempRealFiles[i].path, key: uid));
+      } else {
         tempFiles = await SharedPrefUtils.readPrefStrList('files');
         print('sdadsasd');
       }
-
 
       //*****************SETSTATE****************************
       if (tempProfile != null) {
@@ -399,8 +403,7 @@ class _LandingScreenState extends State<LandingScreen> {
           : await SharedPrefUtils.saveStrList('files', [def]);
 
       await SharedPrefUtils.saveStr('isFirstTimeCloud', 'no');
-    }
-    catch (e){
+    } catch (e) {
       print(e);
       setState(() {
         fetching = false;

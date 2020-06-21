@@ -29,7 +29,10 @@ class _BannerAdPageState extends State<BannerAdPage> {
         size: AdSize.banner,
         listener: (MobileAdEvent event) {
           if (event == MobileAdEvent.loaded) {
-            myBanner..show();
+            myBanner..show(
+              anchorType: AnchorType.bottom,
+              anchorOffset: MediaQuery.of(context).size.height * 0.05
+            );
           }
         });
   }

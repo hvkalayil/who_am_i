@@ -6,6 +6,7 @@ bool isRunning = false, isSignDone = false;
 FirebaseUser user;
 String uid;
 double moveCard = 500, options = 500;
+bool refresh = false;
 
 checkConn() async {
   try {
